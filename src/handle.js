@@ -1,35 +1,52 @@
 import path from 'path';
 
 import ExtractFile from './ExtractFile.js';
+import ExtractOri from './ExtractFileOrigin.js';
 import excel2json from './excel2json';
 import json2excel from './json2excel';
 import mergeJson from './mergeJson';
 import { COMMAD } from './util/config';
-import { loadJsonSync } from './util/index';
+import { loadJsonSync, string2Regexp } from './util/index';
 
 function handle(cfg) {
     switch (cfg.commandType) {
         case COMMAD.GET_WORDS:
             return getWords(cfg);
-            break;
         case COMMAD.TRANSLATE:
             return translate(cfg);
-            break;
         case COMMAD.CHECK_TRANSLATE:
             return check(cfg);
-            break;
         case COMMAD.EXCEL_TO_JSON:
             return excelToJson(cfg);
-            break;
         case COMMAD.JSON_TO_EXCEL:
             return jsonToExcel(cfg);
-            break;
         case COMMAD.MERGE_JSON:
             return merge(cfg);
-            break;
+        case COMMAD.ORIGINAL_CODE:
+            let ignoreCode = cfg.ignoreCode,
+                ignoreExp = cfg.ignoreExp;
+
+            if (ignoreCode) {
+                cfg.ignoreCode = string2Regexp(ignoreCode);
+            }
+
+            if (ignoreExp) {
+                cfg.ignoreExp = string2Regexp(ignoreExp);
+            }
+            return addTrans(cfg);
     }
 
     return Promise.resolve('没有匹配的操作');
+}
+
+function addTrans(cfg) {
+    let extractOri = new ExtractOri({
+        baseReadPath: cfg.baseProPath,
+        baseWritePath: cfg.baseProOutPath,
+        ignoreCode: cfg.ignoreCode,
+        ignoreExp: cfg.ignoreExp
+    });
+    return extractOri.scanFile();
 }
 
 function getWords(cfg) {

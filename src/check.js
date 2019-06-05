@@ -1,8 +1,8 @@
 import start from './index';
 import { COMMAD } from './util/config';
 
-const hongPath = './test/TestFile/config/index.js';
-import arrayToJson from './arrayToJson';
+// const hongPath = './test/TestFile/config/index.js';
+// import arrayToJson from './arrayToJson';
 
 // start({
 //     commandType: COMMAD.GET_WORDS,
@@ -78,18 +78,18 @@ import arrayToJson from './arrayToJson';
 //     let t = '';
 // });
 
-start({
-    commandType: COMMAD.TRANSLATE,
-    baseTranslatePath: './test/TestFile/test/html',
-    baseTransOutPath: './test/TestFile/output/html',
-    languagePath: './test/TestFile/testData/allTest/translate.xlsx',
-    hongPath,
-    sheetName: '',
-    keyName: 'EN',
-    valueName: 'CN'
-}).then(data => {
-    let t = '';
-});
+// start({
+//     commandType: COMMAD.TRANSLATE,
+//     baseTranslatePath: './test/TestFile/test/html',
+//     baseTransOutPath: './test/TestFile/output/html',
+//     languagePath: './test/TestFile/testData/allTest/translate.xlsx',
+//     hongPath,
+//     sheetName: '',
+//     keyName: 'EN',
+//     valueName: 'CN'
+// }).then(data => {
+//     let t = '';
+// });
 
 // start({
 //     commandType: COMMAD.JSON_TO_EXCEL,
@@ -107,3 +107,17 @@ start({
 // });
 
 // start();
+
+
+
+module.exports = function() {
+    start({
+        commandType: COMMAD.ORIGINAL_CODE,
+        // baseReadPath: './test/TestFile/origin',
+        // baseOutPath: './test/TestFile/output/origin'
+        baseReadPath: 'C:/Users/lenovo/Desktop/添加翻译函数/webs',
+        baseOutPath: 'C:/Users/lenovo/Desktop/添加翻译函数/websAfter'
+    }).then(data => {
+        // return expect(data).toEqual(words);
+    });
+}

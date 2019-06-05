@@ -1,0 +1,115 @@
+<html>
+
+<head>
+    <meta HTTP-EQUIV='Pragma' CONTENT='no-cache'>
+    <link rel="stylesheet" href='stylemain.css' type='text/css'>
+    <link rel="stylesheet" href='colors.css' type='text/css'>
+    <script language="javascript">
+        <!-- hide 
+        // 缺失项
+        options = 'menubar=no,resizable=no,scrollbars=no,titlebar=yes,toolbar=no,width=800,height=600';
+        document.write("<td> " + monEntry[0] + "</td> ");
+        document.writeln(" <td class='hd'>Date/Time:</td>");
+        document.writeln(" <option value='" + intf[i] + "'>" + intf[i]);
+        document.writeln(" <input type='button' onClick='btnGo(GO_NEXT)' value='Next Connection'>");
+        if (confirm("Are you sure you want to restore factory default settings?"))
+            eval(code);
+        if ('<%ejGet(enblUsb)%>' == '1') {
+            document.writeln("<TR><TD class='hd'>Test your USB Connection: </TD>");
+            document.writeln("<TD><B><%ejGetOther(diagnostic, 13)%></B>&nbsp;</TD>");
+            document.writeln("<TD><A href='hlpusbconn.html'>Help</A></TD></TR>");
+        }
+        if (diagType == 'f4') {
+            document.writeln("<TR><TD class='hd'>Test ATM OAM F4 segment ping: </TD>");
+            document.writeln("<TD><B><%ejGetOther(diagnostic, 15)%></B>&nbsp;</TD>");
+            document.writeln("<TD><A href='hlpatmseg.html'>Help</A></TD></TR>");
+        }
+        switch (params[0]) {
+            case 'PPPoE':
+                loc = 'diagpppoe.cgi';
+                break;
+            case 'PPPoA':
+                loc = 'diagpppoa.cgi';
+                break;
+            case 'IPoE':
+                loc = 'diagmer.cgi';
+                break;
+            case 'IPoA':
+                loc = 'diagmer.cgi';
+                break;
+            case 'Bridge':
+                loc = 'diagbr.cgi';
+                break;
+            case 'IPoW':
+                loc = 'diagipow.cgi';
+                break;
+            default:
+                loc = '';
+                break;
+        }
+        // 去除多余的空格
+        document.write("     <b>Port Mirroring Setup</b><br><br>"); //engdebug.html
+        // 缺少 + 号
+        document.write("     1. When enable port mirror, hardware path be disabled.<br>");
+        document.write(" <br/>2. hardware path be disabled.");
+        var text = 'this is a string that need to be selected!';
+        var buildSiproxd = '<%ejGetOther(sysInfo, buildSiproxd)%>';
+        var enblSiproxd = '<%ejGet(enblSiproxd)%>';
+        document.write("</select></td> ");
+        document.write("</select> ");
+
+        alert('VLAN ID "' + vid + '" is out of range [0-4095].');
+        alert(esprima.tf + 3);
+        alert(this.target + ' so what?');
+        alert((2 + 3) + '3');
+        alert("No Vlan Id is specified when Vlan mode is enable");
+        document.write("<td class='hd'>DSL PHY and Driver Version:</td>");
+        document.write("<td class='hd'>DSL PHY and" + name + " Driver Version:</td>");
+
+        docW = this.blockStartHTML("folder");
+        if (this.level > 0) {
+            docW = docW + "<tr>"
+            docW = docW + "<td class='menuCell' valign=middle nowrap width=100%>"
+            docW = docW + "<a class='menuLink' href='" + this.hreference + "' TARGET=\"basefrm\""
+            if (browserVersion > 0)
+                docW = docW + "onClick='javascript:clickOnFolder(" + this.id + ")'"
+            docW = docW + ">" + leftSide + this.desc + "&nbsp;&nbsp;" + "</a>"
+            docW = docW + "</td>"
+        }
+
+        function frmLoad() {
+            var adslFlag = '<%ejGet(adslFlag)%>';
+
+            function applyClick() {
+                var loc = 'adslcfgc.cgi?adslFlag=';
+                var adslFlag = 0;
+
+                if (vlanRule != '') {
+                    var vlan = vlanRule[i].split('/');
+                    document.write("<tr align='center'><a>this</tr>");
+                    document.write("<td><input type='text' id='vid" + i + "' value='" + vlan[0] + "'></td>");
+                    document.write("<td><input type='text' id='pbits" + i + "' value='" + vlan[1] + "'></td>");
+                    document.write("<td><input type='checkbox' id='rml" + i + "'></td>");
+                    document.write("</tr>");
+                }
+            }
+        }
+        // done hiding 
+        -->
+    </script>
+</head>
+
+<body onload="frmLoad()">
+    <blockquote>
+        <form>
+            <font size="1" face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" color="white">
+                © 2000-2016 Broadcom. All rights reserved.</font><br>
+            <center>
+                <%ejGet(enblSiproxd)%>
+                <input type='button' onClick='applyClick()' value='Save/Apply'> <input type='button' onClick='location.href="adslcfgadv.html"' value='Advanced Settings'>
+            </center>
+        </form>
+    </blockquote>
+</body>
+
+</html>

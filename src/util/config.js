@@ -31,10 +31,14 @@ const COMMAD = {
     /**
      * JSON文件合并
      */
-    MERGE_JSON: 5
+    MERGE_JSON: 5,
+    /**
+     * 原厂代码处理添加翻译
+     */
+    ORIGINAL_CODE: 6
 };
 
-const COMMAD_TEXT = ['提取词条', '翻译文件', '翻译检查', 'Excel转JSON', 'JSON转Excel', 'JSON合并'];
+const COMMAD_TEXT = ['提取词条', '翻译文件', '翻译检查', 'Excel转JSON', 'JSON转Excel', 'JSON合并', '添加翻译'];
 
 const valid = {
     // 空或者存在的地址
@@ -241,6 +245,27 @@ const baseQuestions = [{
             default (answers) {
                 return getDirname(answers.mainJsonPath);
             }
+        }],
+        [{
+            type: 'input',
+            name: 'baseProPath',
+            message: '原厂代码地址：',
+            validate: valid.folder // 必填，可以是文件也可以是文件夹
+        }, {
+            type: 'input',
+            name: 'baseProOutPath',
+            message: '添加翻译函数后文件输出地址：',
+            default (answers) {
+                return getDirname(answers.baseProPath);
+            }
+        }, {
+            type: 'input',
+            name: 'ignoreCode',
+            message: '需要注释的代码正则：'
+        }, {
+            type: 'input',
+            name: 'ignoreExp',
+            message: '后台插入表达式正则：'
         }]
     ];
 
@@ -251,6 +276,32 @@ const EXCLUDE_FILE = '**/{img,lang,b28,goform,cgi-bin,css}/**';
 const EXCLUDE_FILE_END = '**/{img,lang,b28,goform,cgi-bin,*.min.js,*shiv.js,*respond.js,*shim.js}';
 const EXTNAME_JS = '**/*.js';
 const EXTNAME_HTML = '**/{*.aspx,*.asp,*.ejs,*.html,*.htm}';
+/**
+ * 不进行匹配词条的正则
+ */
+const IGNORE_REGEXP = [
+    /^[\s0-9]*$/,
+    // 单个字母，全数字，数组+标点符号，数字/标点+字母格式不提取
+    /^(([a-z]+[0-9\.,\?\\_\:\-/&\=<>\[\]\(\)\|]+)|([0-9\.,\?\\_\:\-/&\=<>\[\]\(\)\|]+[a-z]+))[a-z0-9\.,\?\\_\:\-/&\=<>\[\]\(\)\|]*$/i,
+    // 单个字母或者单词不添加翻译函数，手动添加
+    /^[a-z]+$/i,
+    // <% xxxx %>格式的字符串不提取
+    /<%([\s\S]*)%>/i,
+    /\(\[([\s\S]*)\]\)/i,
+    /^(&nbsp;)+$/i,
+    /[a-z0-9]*&[a-z]*=/i,
+    // 只包含html结束标签
+    /^(\s*<\s*\/([a-z0-9]+)?>\s*)*$/i,
+    // /^<%=((.|\n)*)%>$/i,
+    // url不提取
+    /^((ht|f)tps?):\/\/([\w\-]+(\.[\w\-]+)*\/)*[\w\-]+(\.[\w\-]+)*\/?(\?([\w\-\.,@?^=%&:\/~\+#]*)+)?/i
+];
+
+const ACTION_TYPE = {
+    ADDTRANS: 1, // 添加翻译函数和提取语言
+    GETLANG: 2, // 提取词条，只提取有翻译函数的词条
+    TRANSLATE: 3, // 翻译文件中的词条
+};
 
 export {
     EXCLUDE_FILE,
@@ -263,5 +314,7 @@ export {
     valid,
     EXTNAME_HTML,
     EXTNAME_JS,
-    baseQuestions
+    baseQuestions,
+    IGNORE_REGEXP,
+    ACTION_TYPE
 };

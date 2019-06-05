@@ -1,6 +1,6 @@
 import handle from './handle';
 import { COMMAD, valid, questions, baseQuestions, COMMAD_TEXT, CONFIG_FILE_NAME } from './util/config';
-import { getDirname, LOG_TYPE, log } from './util/index';
+import { getDirname, LOG_TYPE, log, string2Regexp } from './util/index';
 
 import path from 'path';
 import fs from 'fs';
@@ -73,6 +73,14 @@ function gerArgs() {
             };
             console.log(config);
             break;
+        case COMMAD.ORIGINAL_CODE:
+            config = {
+                commandType: 6,
+                baseProPath: args.from,
+                baseProOutPath: args.to
+            };
+            console.log(config);
+            break;
     }
     return config;
 }
@@ -130,7 +138,7 @@ function correctCfg(cfg) {
 }
 
 function fullPath(cfg) {
-    let fullField = ['baseReadPath', 'baseOutPath', 'baseTranslatePath', 'baseTransOutPath', 'hongPath', 'languagePath', 'baseCheckPath', 'logPath', 'langJsonPath', 'excelPath', 'outJsonPath', 'jsonPath', 'outExcelPath', 'mainJsonPath', 'mergeJsonPath', 'outMergeJsonPath'];
+    let fullField = ['baseReadPath', 'baseOutPath', 'baseTranslatePath', 'baseTransOutPath', 'hongPath', 'languagePath', 'baseCheckPath', 'logPath', 'langJsonPath', 'excelPath', 'outJsonPath', 'jsonPath', 'outExcelPath', 'mainJsonPath', 'mergeJsonPath', 'outMergeJsonPath', 'baseProPath', 'baseProOutPath'];
 
     // 将相对地址转为绝对地址
     fullField.forEach(field => {
@@ -211,6 +219,14 @@ let validate = {
             return true;
         }
         cfg.outMergeJsonPath = cfg.outMergeJsonPath || getDirname(cfg.mainJsonPath);
+    },
+    6: function(cfg) {
+        if (valid.folder(cfg.baseProPath) !== true) {
+            return true;
+        }
+
+        // 为空的处理
+        cfg.baseProOutPath = cfg.baseProOutPath || getDirname(cfg.baseProPath);
     }
 }
 

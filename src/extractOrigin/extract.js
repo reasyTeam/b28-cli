@@ -5,10 +5,9 @@ import {
     LOG_TYPE,
     copyFile,
     writeTextFile
-}
-from '../util/index';
-import { IGNORE_REGEXP } from '../util/config';
+} from '../util/index';
 
+import { IGNORE_REGEXP } from '../util/config';
 import path from 'path';
 
 /**
@@ -17,21 +16,12 @@ import path from 'path';
 class Extract {
     constructor(option) {
         this.option = Object.assign({}, {
-            // 宏配置,根据宏去筛选字段是否进行提取
-            CONFIG_HONG: {},
-            // 只提取或者翻译中文
-            onlyZH: false,
-            // 翻译词条
-            transWords: {},
-            // 是否是翻译文件
-            isTranslate: false,
-            // 是否是检查翻译
-            isCheckTrans: false,
-            // 翻译文件时，写入的根目录
-            baseWritePath: '',
-            baseReadPath: '',
             // 词条提取完成后的操作
-            onComplete: null
+            onComplete: null,
+            ignoreCode: /<!--\s*hide|-->/g,
+            // 将对应的词条全部修改为'/**<%%>**/window.MS'
+            // ignoreExp: /(\=|\+|\-|\*|\/|\s|\(|\[|\{)\s*<%.*?%>/g
+            ignoreExp: /<%([^\n]*?)%>/g
         }, option);
         this.init();
     }
@@ -45,11 +35,10 @@ class Extract {
         this.isWorking = false;
         // 待处理文件列表
         this.handleList = [];
-        this.CONFIG_HONG = this.option.CONFIG_HONG || {};
     }
 
     handleFile(filePath) {
-        log(`开始提取文件-${filePath}`);
+        // log(`开始提取文件-${filePath}`);
         this.isWorking = true;
         this.curFilePath = filePath;
         return loadFile(filePath)
@@ -60,11 +49,9 @@ class Extract {
                 return this.scanNode(AST);
             })
             .then((fileData) => {
-                if (this.option.isTranslate) {
-                    // 写入文件
-                    log(`翻译文件-${filePath}`);
-                    writeTextFile(path.resolve(this.option.baseWritePath, path.relative(this.option.baseReadPath, this.curFilePath)), fileData);
-                }
+                // 写入文件
+                log(`添加翻译函数-${filePath}`);
+                writeTextFile(path.resolve(this.option.baseWritePath, path.relative(this.option.baseReadPath, this.curFilePath)), fileData);
                 this.complete();
                 return this.startTrans();
             })
@@ -96,9 +83,6 @@ class Extract {
 
     setSingleAttr(attr, value) {
         this.option[attr] = value;
-        if (attr === 'CONFIG_HONG') {
-            this.CONFIG_HONG = value;
-        }
     }
 
     startTrans() {
@@ -125,48 +109,29 @@ class Extract {
         });
     }
 
-    getWord(val, isJs) {
+    getWord(val) {
         if (!val || /^\s*$/.test(val)) {
             return '';
         }
-        if (!isJs) {
-            let skip = IGNORE_REGEXP.some(item => item.test(val));
-            if (skip) {
-                return '';
-            }
+
+        // 经过处理的字符串
+        if (/\{%s\}/i.test(val)) {
+            return val;
         }
 
-        val = trim(val);
-        // 移除首尾空格
-        val = val.replace(/(^\s+)|(\s+$)/g, '');
-        // 同时合并词条内部的多个空格等为一个空格，保留js文件中词条内的\n
-        val = isJs ? val.replace(/([^\S\n]+)/g, " ") : val.replace(/(\s+)/g, " ");
-        let addValue = '';
-        if (/^<%=((.|\n)*)%>$/.test(val)) {
+        let skip = IGNORE_REGEXP.some(item => item.test(val));
+        if (skip) {
             return '';
         }
 
-        // 只提取中文
-        if (this.option.onlyZH) {
-            if (/[\u4e00-\u9fa5]/.test(val)) {
-                addValue = val;
-            }
-        } else if (/[a-z]/i.test(val) || /[\u4e00-\u9fa5]/.test(val)) {
-            //中英文都提取
+        let addValue = '';
+
+        //中英文都提取
+        if (/[a-z]/i.test(val) || /[\u4e00-\u9fa5]/.test(val)) {
             addValue = val;
         }
 
-
-        if (addValue) {
-            if (this.option.isTranslate || this.option.isCheckTrans) {
-                let transVal = this.option.transWords[addValue];
-                if (transVal) {
-                    return this.option.isCheckTrans ? "" : transVal;
-                }
-            }
-            this.addWord(addValue);
-        }
-        return '';
+        return addValue;
     }
 
     complete() {

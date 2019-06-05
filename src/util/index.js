@@ -312,14 +312,8 @@ function createFolder(folder, callback) {
     }
 }
 
-function copyFile(src, dst) {
-    fs.readFile(src, (err, data) => {
-        if (err) {
-            return;
-        }
-
-        fs.writeFile(dst, data);
-    });
+function copyFile(src, dist) {
+    fs.createReadStream(src).pipe(fs.createWriteStream(dist));
 }
 
 /**
@@ -334,7 +328,30 @@ function correctPath(filePath) {
  * 移除空格
  */
 function trim(text) {
-    return text.trim();
+    return text.replace(/(^\s+)|(\s+$)/g, '');
+}
+
+function getType(obj) {
+    return Object.prototype.toString.call(obj).slice(8, -1);
+}
+
+function string2Regexp(str) {
+    if (getType(str) === 'RegExp') {
+        return str;
+    }
+
+    if (/^\//.test(str)) {
+        let index = str.lastIndexOf('/');
+        if (index === 0) {
+            return new RegExp(str);
+        }
+
+        let t = str.substring(1, index),
+            k = str.substring(index + 1);
+        return new RegExp(t, k);
+    }
+
+    return new RegExp(str);
 }
 
 export {
@@ -349,12 +366,14 @@ export {
     createFolder,
     copyFile,
     writeTextFile,
+    string2Regexp,
     writeExcel,
     correctPath,
     writeJson,
     mergeObject,
     getDirname,
     LOG_TYPE,
+    getType,
     trim,
     log
 };
