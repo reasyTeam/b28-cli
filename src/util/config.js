@@ -264,7 +264,7 @@ const baseQuestions = [{
             message: '需要注释的代码正则：'
         }, {
             type: 'input',
-            name: 'ignoreExp',
+            name: 'templateExp',
             message: '后台插入表达式正则：'
         }]
     ];
@@ -275,6 +275,8 @@ const baseQuestions = [{
 const EXCLUDE_FILE = '**/{img,lang,b28,goform,cgi-bin,css}/**';
 const EXCLUDE_FILE_END = '**/{img,lang,b28,goform,cgi-bin,*.min.js,*shiv.js,*respond.js,*shim.js}';
 const EXTNAME_JS = '**/*.js';
+const EXTNAME_VUE = '**/*.vue';
+const EXTNAME_JSX = '**/*.jsx';
 const EXTNAME_HTML = '**/{*.aspx,*.asp,*.ejs,*.html,*.htm}';
 /**
  * 不进行匹配词条的正则
@@ -298,9 +300,9 @@ const IGNORE_REGEXP = [
  * 不进行匹配词条的规则函数
  */
 const IGNORE_WORDS = ['none', 'visible', 'display', 'block'];
-const IGNORE_FUNCTIONS = {
+const IGNORE_FUNCTIONS = [
     // 单个单词可添加翻译函数除了全大写，none，visible等css关键词
-    word(str) {
+    function word(str) {
         if (/[^a-z]/i.test(str)) {
             return false;
         }
@@ -323,7 +325,7 @@ const IGNORE_FUNCTIONS = {
         return false;
     },
     // 单个字母，全数字，数组+标点符号，数字/标点+字母格式不添加(如果不包含数字=？则还是添加)
-    specialWord(str) {
+    function specialWord(str) {
         if (/^(([a-z]+[0-9\.,\?\\_\:\-/&\=<>\[\]\(\)\|]+)|([0-9\.,\?\\_\:\-/&\=<>\[\]\(\)\|]+[a-z]+))[a-z0-9\.,\?\\_\:\-/&\=<>\[\]\(\)\|]*$/i.test(str)) {
             if (!/[0-9\=\?]/.test(str)) {
                 return false;
@@ -332,7 +334,7 @@ const IGNORE_FUNCTIONS = {
         }
         return false;
     }
-};
+];
 
 const ACTION_TYPE = {
     ADDTRANS: 1, // 添加翻译函数和提取语言
@@ -351,6 +353,7 @@ export {
     valid,
     EXTNAME_HTML,
     EXTNAME_JS,
+    EXTNAME_VUE,
     baseQuestions,
     IGNORE_REGEXP,
     IGNORE_FUNCTIONS,

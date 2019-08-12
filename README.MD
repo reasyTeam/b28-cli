@@ -1,8 +1,11 @@
 # 翻译工具，Excel/Json处理工具
 
 **更新说明：**
+- 添加`.Vue`文件词条的提取和翻译替换，同时对`template`需要添加翻译函数的地方会自动的添加翻译函数
+- 修改参数配置错误信息，提供具体的参数错误说明
 - 添加JSON部分合并功能，满足删除多余词条的业务场景
 - 添加原厂代码添加翻译函数功能，支撑原厂代码多国语言的快速开发
+
 
 **该工具同时包含以下几个功能：**
 
@@ -23,7 +26,48 @@
 
 通过[`jsdom`](jsdom)将`html`代码转成`DOM`树，然后对`DOM`进行遍历。
 
+**Vue文件提取替换方法：**
+
+将`template`和`script`模块分开进行处理。`script`代码还是按照JS的逻辑进行处理。`template`的解析处理参考`vue`的`compiler`模块进行解析。首先遍历html节点提取翻译相关的属性和文本信息，包括词条的`start`和`end`位置索引，然后解析提取的信息，提取需要翻译的词条，同时将翻译后的词条对原`template`进行原地替换，最后输出替换后的vue文件。		
+
+**对于含有翻译函数`_()`的表达式会直接提取，不包含翻译函数的表达式只有包含中文的情况下才会进行提取和翻译替换。纯英文词条默认不提取，以为无法区分是表达式还是词条。**
+
+默认的处理如下：
+
+- 对于指令只对`v-bind`的指令做处理，其它指令不会涉及多语言相关内容。如果指令中包含`_('')`翻译函数，则只处理翻译函数内的词条，其它内容不做处理。如果不包含翻译函数，且含有中文，则进行提取和替换
+- 对于非`v-bind`属性`title`、`alt`、`placeholder`如果内容是中文，则会进行提取，翻译的时候会将该内容替换为对应`v-bind`格式
+- 对于文本内容会将`{{}}`模板语法内的表达式提取为参数，然后将整个词条重新组装为`{{_('xxxx %s xxx', [ars])}}`格式，并且将原文本进行替换
+
+示例如下：
+
+```vue
+<template>
+	<div>
+        <div title="我是标题">{{'这是测试1' + test}}</div>
+        <div :title="anna">{{_('这是测试2') + check}}</div>
+        <div :key="_('我也是标题')">我就是一段纯文本而已！</div>
+        <v-pop :option="dialog" v-model="dialog.show">这是内容：{{coneten + mess}}</v-pop>
+    </div>
+</template>
+```
+
+进行工具翻译替换后：
+
+```vue
+<template>
+	<div>
+        <div :title="_('this is title')">{{_('this is test one %s', [test])}}</div>
+        <div :title="anna">{{_('this is test two') + check}}</div>
+        <div :key="_('This is title too')">{{_('Just a pure text message.')}}</div>
+        <v-pop :option="dialog" v-model="dialog.show">{{_('this is content: %s%s', [content, mess])}}</v-pop>
+    </div>
+</template>
+```
+
+![处理结果](./img/vue.jpg)
+
 **安装**
+
 ```
 npm install b28-cli -g
 ```
@@ -210,11 +254,14 @@ module.exports = {
 | baseProPath | String | `必填` | 原厂代码地址 |
 | baseProOutPath | String | `baseProPath` | 添加翻译函数后文件输出地址 |
 | ignoreCode | `String`/`Regexp` | `/<!--\s*hide|-->/g` | 需要注释的代码正则 |
-| ignoreExp | `String`/`Regexp` | `/<%([^\n]*?)%>/g` | 后台插入表达式正则 |
+| templateExp | `String`/`Regexp` | `/<%([^\n]*?)%>/g` | JS文件中后台用于插入替换的模板表达式对应的正则 |
+| customRules | `Array`/`Function`/`Regexp` | `[]` | 自定义不提词条规则列表，可以是正则也可以是function |
 
 > `ignoreCode`: 原厂代码中需要注释的代码对应的`正则`，不注释对应的js代码会有语法错误，例如部分原厂代码中在代码开头会包含`<!--\s*hide `代码段等
 >
-> `ignoreExp`: 原厂中没有实现前后端分离，通过标记注入参数的代码段对应的`正则`，如`<%ejGetOther(sessionKey)%>`
+> `templateExp`: 原厂中没有实现前后端分离，通过特定的模板语法注入参数的代码段对应的`正则`，如`<%ejGetOther(sessionKey)%>`
+>
+> `customRules`: 用于设置默认规则外，不进行提取的词条
 
 **预设不进行翻译配置如下**
 - 全数字

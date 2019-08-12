@@ -375,16 +375,16 @@ class ExtractJs extends Extract {
             } else {
                 return Math.pow(10, match.length - 1) + '';
             }
-        }).replace(this.option.ignoreExp, function(match, val) {
+        }).replace(this.option.templateExp, function(match, val) {
             // return `([${val}])`;
             return `([${val.replace(/;$/, ' ')}])`;
         });
     }
 }
 
-String.prototype.splice = function(start, end, newStr) {
-    return this.slice(0, start) + newStr + this.slice(end);
-};
+// String.prototype.splice = function(start, end, newStr) {
+//     return this.slice(0, start) + newStr + this.slice(end);
+// };
 
 
 export default ExtractJs;
