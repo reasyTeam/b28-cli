@@ -169,7 +169,9 @@ function getAllWords(cfg) {
         writeExcel: false,
         needFilePath: false
     });
-    extract.scanFile().then(words => ExtractLangExcel(words, cfg.languagePath, cfg.baseOutPath).catch(error => console.log(error.message)));
+    extract.scanFile().then(words => {
+        ExtractLangExcel(words, cfg.languagePath, cfg.baseOutPath).catch(error => console.log(error.message));
+    });
 }
 
 export default handle;

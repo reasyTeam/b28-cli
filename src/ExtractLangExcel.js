@@ -6,14 +6,9 @@ import {
     loadJson,
     writeExcel,
     log,
-    LOG_TYPE
+    LOG_TYPE,
+    getNowFormatDate
 } from './util/index';
-
-import {
-    EXTNAME_JS,
-    EXTNAME_VUE,
-    EXTNAME_HTML
-} from './util/config';
 
 
 let langArr = {
@@ -41,7 +36,7 @@ let langArr = {
     "ko": "韩语",			//韩语，sublime默认字体显示乱码
     "bg": "保加利亚语",  //保加利亚语
     "laes":"美西",//美西
-    "brpt": "巴葡", // 巴葡
+    "brpt": "巴葡" // 巴葡
 }
 /**
  *
@@ -50,8 +45,6 @@ let langArr = {
  * @param {string} outPath
  */
 async function ExtractLangExcel(words, jsonPath, outPath) {
-    console.log(jsonPath);
-    console.log(outPath);
     let outData = [],
         jsonFolders = [],
         filePath = "",
@@ -59,7 +52,7 @@ async function ExtractLangExcel(words, jsonPath, outPath) {
         curLang = "en";
     jsonPath = correctPath(jsonPath);
     jsonFolders = scanFolder(jsonPath).items;
-    outPath = path.join(correctPath(outPath), 'lang.xlsx');
+    outPath = path.join(correctPath(outPath), 'lang' +  + getNowFormatDate() + '.xlsx');
 
     // 每一行的数据存在一个数组中，二维数组outData是完整的数据，用来最终生成excel文件
     words.forEach(function (item, index) {
@@ -76,6 +69,7 @@ async function ExtractLangExcel(words, jsonPath, outPath) {
     }
 
     try {
+        outData = Array.from([...new Set(outData)][0]);
         writeExcel(outData, outPath, 'lang');
         log(`代码中所有词条的翻译已提取完成，保存在${outPath}中`, LOG_TYPE.DONE);
     } catch(e) {
@@ -89,24 +83,43 @@ function getExcelData(words, outData, filePath, dataIndex) {
         data = trimJson(data);
         // data是json文件的值，json对象
         words.forEach(function (item, wordIndex) {
+            item = trimStr(item);
             if (wordIndex == "0") {
                 return true;
             }
             if (data[item]) {
                 outData[wordIndex][dataIndex] = data[item];
             } else {
-                outData[wordIndex][dataIndex] = "";
+                outData[wordIndex][dataIndex] = {
+                    v: '',
+                    s: {
+                        fill: {
+                            fgColor: {rgb: 'FFC5C5'}
+                        }
+
+                    }
+                };
             }
         });
     })
 }
 
 function trimJson(jsonObj) {
-    let str = JSON.stringify(jsonObj),
+    let str = JSON.stringify(jsonObj).toString(),
         leftReg = /\"\s+/g,
         rightReg = /\s+\"/g,
         btwReg = /\s{2,}/g;
-    str = str.replace(leftReg, '"').replace(rightReg, '"').replace(btwReg," ");
+    str = str.replace(leftReg, '"').replace(rightReg, '"').replace(btwReg, " ");
+    unescape(str);
     return JSON.parse(str);
+}
+
+function trimStr(str) {
+    let leftReg = /\"\s+/g,
+        rightReg = /\s+\"/g,
+        btwReg = /\s{2,}/g;
+    str = str.replace(leftReg, '"').replace(rightReg, '"').replace(btwReg, " ");
+    unescape(str);
+    return str;
 }
 export default ExtractLangExcel;

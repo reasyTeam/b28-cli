@@ -47,7 +47,7 @@ const COMMAD = {
 
 };
 
-const COMMAD_TEXT = ['提取词条', '翻译文件', '翻译检查', 'Excel转JSON', 'JSON转Excel', 'JSON合并', '添加翻译', '提取词条2.0', '翻译文件检查'];
+const COMMAD_TEXT = ['提取词条', '翻译文件', '翻译检查', 'Excel转JSON', 'JSON转Excel', 'JSON合并', '添加翻译', '提取翻译', '翻译文件检查'];
 
 const valid = {
     // 空或者存在的地址
@@ -283,12 +283,12 @@ const baseQuestions = [{
             validate: valid.folder // 必填，可以是文件也可以是文件夹
         }, {
             type: 'input',
-            name: 'jsonPath',
+            name: 'languagePath',
             message: '语言包文地址（文件夹）：',
             validate: valid.folder
         }, {
             type: 'input',
-            name: 'baseWritePath',
+            name: 'baseOutPath',
             message: '提取的Excel文件输出地址：',
             default (answers) {
                 return getDirname(answers.baseReadPath);
