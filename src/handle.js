@@ -70,14 +70,9 @@ function getWords(cfg) {
   return extract.scanFile();
 }
 
-/**
- * 翻译的同时生成语言包
- * 翻译时的key列永远是CN，Value列永远是EN
- */
 function translate(cfg) {
   let extract;
 
-  // 通过JSON文件直接翻译
   if (path.extname(cfg.languagePath) === ".json") {
     let langData = loadJsonSync(cfg.languagePath);
     extract = new ExtractFile({
@@ -87,10 +82,8 @@ function translate(cfg) {
       hongPath: cfg.hongPath,
       transWords: langData
     });
-    // extract.setAttr('transWords', langData);
     return extract.scanFile();
   } else {
-    // 通过Excel文件翻译，并生成语言包JSON
     return excel2json({
       excelPath: cfg.languagePath,
       outPath: cfg.baseTransOutPath,
@@ -111,14 +104,12 @@ function translate(cfg) {
         hongPath: cfg.hongPath,
         transWords: langData
       });
-      // extract.setAttr('transWords', langData);
       return extract.scanFile();
     });
   }
 }
 
 function check(cfg) {
-  // 通过JSON文件直接翻译
   let langData = loadJsonSync(cfg.langJsonPath);
 
   let extract = new ExtractFile({

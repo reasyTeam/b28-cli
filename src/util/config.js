@@ -8,45 +8,15 @@ const CONFIG_FILE_NAME = "b28.config.js";
 const TRANS_NAME_REGEX = /^_$/;
 
 const COMMAD = {
-  /**
-   * 提取词条
-   */
   GET_WORDS: 0,
-  /**
-   * 翻译文件
-   */
   TRANSLATE: 1,
-  /**
-   * 翻译检查
-   */
   CHECK_TRANSLATE: 2,
-  /**
-   * Excel转JSON
-   */
   EXCEL_TO_JSON: 3,
-  /**
-   * JSON转Excel
-   */
   JSON_TO_EXCEL: 4,
-  /**
-   * JSON文件合并
-   */
   MERGE_JSON: 5,
-  /**
-   * 原厂代码处理添加翻译
-   */
   ORIGINAL_CODE: 6,
-  /**
-   * 提取词条及json文件生成一个excel表格
-   */
   GET_ALLWORDS: 7,
-  /**
-   * 翻译文件检查
-   */
   CHECK_LANGEXCEL: 8,
-  /**
-   * 文件转码
-   */
   TRANS_ENCODE: 9
 };
 
@@ -64,7 +34,6 @@ const COMMAD_TEXT = [
 ];
 
 const valid = {
-  // 空或者存在的地址
   specialfile(val) {
     val = val || "";
     val = val.replace(/(^\s*)|(\s*$)/g, "");
@@ -88,7 +57,6 @@ const valid = {
     }
     return true;
   },
-  // 存在的文件非文件夹
   existFile(val) {
     val = val || "";
     val = val.replace(/(^\s*)|(\s*$)/g, "");
@@ -115,7 +83,7 @@ const baseQuestions = [
       filter: function(val) {
         return COMMAD_TEXT.indexOf(val);
       },
-      pageSize: 9 //cmd命令行显示行数
+      pageSize: 9
     }
   ],
   questions = [
@@ -129,7 +97,7 @@ const baseQuestions = [
         type: "input",
         name: "baseReadPath",
         message: "待提取文件地址：",
-        validate: valid.folder // 必填，可以是文件也可以是文件夹
+        validate: valid.folder
       },
       {
         type: "input",
@@ -152,7 +120,7 @@ const baseQuestions = [
         type: "input",
         name: "baseTranslatePath",
         message: "待翻译文件根目录：",
-        validate: valid.folder // 必填，可以是文件也可以是文件夹
+        validate: valid.folder
       },
       {
         type: "input",
@@ -187,7 +155,7 @@ const baseQuestions = [
       {
         type: "input",
         name: "keyName",
-        message: "key对应列：", //指代代码中的词条需要被那一列的数据替换
+        message: "key对应列：",
         default: "EN",
         when(answers) {
           return path.extname(answers.languagePath) !== ".json";
@@ -196,8 +164,8 @@ const baseQuestions = [
       {
         type: "input",
         name: "valueName",
-        message: "value对应列：", //指代代码中目前需要被替换的语言
-        default: "CN", // ALL代表所有
+        message: "value对应列：",
+        default: "CN",
         when(answers) {
           return path.extname(answers.languagePath) !== ".json";
         }
@@ -254,7 +222,7 @@ const baseQuestions = [
         type: "input",
         name: "valueName",
         message: "value对应列：",
-        default: "" // ALL代表所有
+        default: ""
       },
       {
         type: "input",
@@ -308,7 +276,7 @@ const baseQuestions = [
         type: "input",
         name: "baseProPath",
         message: "原厂代码地址：",
-        validate: valid.folder // 必填，可以是文件也可以是文件夹
+        validate: valid.folder
       },
       {
         type: "input",
@@ -334,7 +302,7 @@ const baseQuestions = [
         type: "input",
         name: "baseReadPath",
         message: "待提取文件地址：",
-        validate: valid.folder // 必填，可以是文件也可以是文件夹
+        validate: valid.folder
       },
       {
         type: "input",
@@ -375,7 +343,7 @@ const baseQuestions = [
       {
         type: "input",
         name: "keyName1",
-        message: "key对应列：", //指代代码中的词条需要被那一列的数据替换
+        message: "key对应列：",
         default: "EN"
       },
       {
@@ -393,7 +361,7 @@ const baseQuestions = [
       {
         type: "input",
         name: "keyName2",
-        message: "key对应列：", //指代代码中的词条需要被那一列的数据替换
+        message: "key对应列：",
         default: "EN"
       }
     ],
@@ -419,9 +387,6 @@ const baseQuestions = [
     ]
   ];
 
-/**
- * 忽略文件正则
- */
 const EXCLUDE_FILE = "**/{img,images,lang,b28,goform,cgi-bin,css}/**";
 const EXCLUDE_FILE_END =
   "**/{img,lang,b28,goform,cgi-bin,*.min.js,*shiv.js,*respond.js,*shim.js,.gitignore,.pidTmp,*.css,*.jpg,*.png,*.gif,*.bat,*.cgi}";
@@ -431,30 +396,19 @@ const EXTNAME_JSX = "**/*.jsx";
 const EXTNAME_HTML = "**/{*.aspx,*.asp,*.ejs,*.html,*.htm}";
 const TRANS_EXCLUDE =
   "**/{*.min.js,*shiv.js,*respond.js,*shim.js,.gitignore,.pidTmp,*.css,*.jpg,*.jpeg,*.png,*.gif,*.bat,*.cgi}";
-/**
- * 不进行匹配词条的正则
- */
+
 const IGNORE_REGEXP = [
   /^[\s0-9]*$/,
-  // 单个字母
   /^[a-z]$/i,
-  // <% xxxx %>格式的字符串不提取
   /<%([\s\S]*)%>/i,
   /\(\[([\s\S]*)\]\)/i,
   /^(&nbsp;)+$/i,
   /[a-z0-9]*&[a-z]*=/i,
-  // 只包含html结束标签
   /^(\s*<\s*\/([a-z0-9]+)?>\s*)*$/i,
-  // /^<%=((.|\n)*)%>$/i,
-  // url不提取
   /^((ht|f)tps?):\/\/([\w\-]+(\.[\w\-]+)*\/)*[\w\-]+(\.[\w\-]+)*\/?(\?([\w\-\.,@?^=%&:\/~\+#]*)+)?/i
 ];
-/**
- * 不进行匹配词条的规则函数
- */
 const IGNORE_WORDS = ["none", "visible", "display", "block"];
 const IGNORE_FUNCTIONS = [
-  // 单个单词可添加翻译函数除了全大写，none，visible等css关键词
   function word(str) {
     if (/[^a-z]/i.test(str)) {
       return false;
@@ -464,20 +418,12 @@ const IGNORE_FUNCTIONS = [
       return true;
     }
 
-    // str = str.slice(1);
-    // // 除第一个字母外大小写混合
-    // if (/[a-z]/.test(str) && /[A-Z]/.test(str)) {
-    //     return true;
-    // }
-
-    //全大写字符串
     if (/^[A-Z]+$/.test(str)) {
       return true;
     }
 
     return false;
   },
-  // 单个字母，全数字，数组+标点符号，数字/标点+字母格式不添加(如果不包含数字=？则还是添加)
   function specialWord(str) {
     if (
       /^(([a-z]+[0-9\.,\?\\_\:\-/&\=<>\[\]\(\)\|]+)|([0-9\.,\?\\_\:\-/&\=<>\[\]\(\)\|]+[a-z]+))[a-z0-9\.,\?\\_\:\-/&\=<>\[\]\(\)\|]*$/i.test(
@@ -494,9 +440,9 @@ const IGNORE_FUNCTIONS = [
 ];
 
 const ACTION_TYPE = {
-  ADDTRANS: 1, // 添加翻译函数和提取语言
-  GETLANG: 2, // 提取词条，只提取有翻译函数的词条
-  TRANSLATE: 3 // 翻译文件中的词条
+  ADDTRANS: 1,
+  GETLANG: 2,
+  TRANSLATE: 3
 };
 
 export {

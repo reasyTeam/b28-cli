@@ -1,9 +1,3 @@
-// 处理一些简单的命令
-/**
- * b28-cli init
- * b28-cli -v/v
- * b28-cli -h/h
- */
 const inquirer = require("inquirer");
 import cfg from "../package.json";
 const figlet = require("figlet");
@@ -12,9 +6,6 @@ import { log } from "./util/index";
 import path from "path";
 import fs from "fs";
 
-/**
- * 生成配置文件需要的注释
- */
 const comments = {
   commandType: "操作类型",
   onlyZH: "只提取中文",
@@ -47,9 +38,7 @@ const comments = {
   transOutPath: "转码后文件输出地址",
   transEncode: "转码后文件的编码方式(默认UTF-8)"
 };
-/**
- * 命令行手动输入参数逐条配置
- */
+
 let questions = [
   [
     {
@@ -102,14 +91,14 @@ let questions = [
     {
       type: "input",
       name: "keyName",
-      message: "key对应列：", //指代代码中的词条需要被那一列的数据替换
+      message: "key对应列：",
       default: "EN"
     },
     {
       type: "input",
       name: "valueName",
-      message: "value对应列：", //指代代码中目前需要被替换的语言
-      default: "CN", // ALL代表所有
+      message: "value对应列：",
+      default: "CN",
       default: ""
     }
   ],
@@ -155,7 +144,7 @@ let questions = [
     {
       type: "input",
       name: "valueName",
-      message: "value对应列：" // ALL代表所有
+      message: "value对应列："
     },
     {
       type: "input",
@@ -263,9 +252,7 @@ let questions = [
     }
   ]
 ];
-/**
- * 初始化b28.config.js文件
- */
+
 function handleInit() {
   let config = {};
   inquirer

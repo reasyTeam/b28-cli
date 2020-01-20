@@ -21,7 +21,6 @@ function scanFile(filePath) {
 function transCode(filePath, outPath, encode = "UTF-8") {
   let fsData = scanFile(filePath);
 
-  // 创建文件目录
   createFolder(outPath);
   fsData.folders.forEach(item => {
     createFolder(path.join(outPath, path.relative(filePath, item))); //创建目录
@@ -30,7 +29,7 @@ function transCode(filePath, outPath, encode = "UTF-8") {
   fsData.files.forEach(file => {
     try {
       let outUrl = path.join(outPath, path.relative(filePath, file));
-      // .cgi等文件直接拷贝
+
       if (minimatch(file, EXCLUDE_FILE) || minimatch(file, TRANS_EXCLUDE)) {
         fs.createReadStream(file).pipe(fs.createWriteStream(outUrl));
         return true;
@@ -40,7 +39,6 @@ function transCode(filePath, outPath, encode = "UTF-8") {
         oldEncode = jschardet.detect(fileData).encoding,
         data = iconv.decode(fileData, oldEncode);
 
-      // encode编码直接拷贝
       let lowCaseCode = oldEncode.toLowerCase();
       if (
         lowCaseCode === encode.toLowerCase() ||
@@ -49,7 +47,7 @@ function transCode(filePath, outPath, encode = "UTF-8") {
         fs.createReadStream(file).pipe(fs.createWriteStream(outUrl));
         return true;
       }
-      // 写入文件
+
       fs.writeFile(outUrl, data, { encoding: encode }, function(err) {
         if (err) {
           log(`文件${file}转码失败，直接拷贝！`, LOG_TYPE.WARNING);

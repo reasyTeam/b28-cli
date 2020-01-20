@@ -18,12 +18,10 @@ import handleRequest from "./cmd";
 let cwd = process.cwd();
 let configFilepath = path.join(cwd, CONFIG_FILE_NAME);
 
-// 扩展String
 String.prototype.splice = function(start, end, newStr) {
   return this.slice(0, start) + newStr + this.slice(end);
 };
 
-//将命令和参数分离
 function gerArgs() {
   let args = require("./util/getOption")(process.argv.splice(2)),
     config;
@@ -156,9 +154,6 @@ function getCfg() {
     });
 }
 
-/**
- * 验证和修正所有配置参数
- */
 function correctCfg(cfg) {
   if (cfg.commandType === undefined || cfg.commandType === "") {
     log("请选择您需要使用的功能！", LOG_TYPE.WARNING);
@@ -208,7 +203,6 @@ function fullPath(cfg) {
     "transOutPath"
   ];
 
-  // 将相对地址转为绝对地址
   fullField.forEach(field => {
     let val = cfg[field] || "";
     val = val.replace(/(^\s*)|(\s*$)/g, "");
@@ -242,7 +236,6 @@ let validate = {
       return errorMess("baseReadPath", ARG_TYPE.FOLDER, cfg);
     }
 
-    // 为空的处理
     cfg.baseOutPath = cfg.baseOutPath || getDirname(cfg.baseReadPath);
   },
   [COMMAD.TRANSLATE]: function(cfg) {
@@ -321,7 +314,6 @@ let validate = {
       return errorMess("baseProPath", ARG_TYPE.FOLDER, cfg);
     }
 
-    // 为空的处理
     cfg.baseProOutPath = cfg.baseProOutPath || getDirname(cfg.baseProPath);
   },
   [COMMAD.GET_ALLWORDS]: function(cfg) {
