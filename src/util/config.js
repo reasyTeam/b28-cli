@@ -387,7 +387,7 @@ const baseQuestions = [
     ]
   ];
 
-const EXCLUDE_FILE = "**/{img,images,lang,b28,goform,cgi-bin,css}/**";
+const EXCLUDE_FILE = "**/{img,images,lang,b28,goform,cgi-bin,css,OEM_CONFIG}/**";
 const EXCLUDE_FILE_END =
   "**/{img,lang,b28,goform,cgi-bin,*.min.js,*shiv.js,*respond.js,*shim.js,.gitignore,.pidTmp,*.css,*.jpg,*.png,*.gif,*.bat,*.cgi}";
 const EXTNAME_JS = "**/*.js";
