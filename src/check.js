@@ -8,8 +8,8 @@ const hongPath = "./test/TestFile/config/index.js";
 function getWords() {
   start({
     commandType: COMMAD.GET_WORDS,
-    baseReadPath: "./test/TestFile/test/js",
-    baseOutPath: "./test/TestFile/output/js",
+    baseReadPath: "C:/Users/lenovo/Desktop/trans",
+    baseOutPath: "C:/Users/lenovo/Desktop/trans",
     hongPath
   }).then(data => {
     let t = data;
@@ -191,7 +191,7 @@ function transAllFile() {
   });
 }
 module.exports = function() {
-  // translateJs();
-  //   getWords();
-  transAllFile();
+  translateJs();
+  getWords();
+  // transAllFile();
 };

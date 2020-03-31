@@ -387,7 +387,8 @@ const baseQuestions = [
     ]
   ];
 
-const EXCLUDE_FILE = "**/{img,images,lang,b28,goform,cgi-bin,css,OEM_CONFIG}/**";
+const EXCLUDE_FILE =
+  "**/{img,images,lang,b28,goform,cgi-bin,css,OEM_CONFIG}/**";
 const EXCLUDE_FILE_END =
   "**/{img,lang,b28,goform,cgi-bin,*.min.js,*shiv.js,*respond.js,*shim.js,.gitignore,.pidTmp,*.css,*.jpg,*.png,*.gif,*.bat,*.cgi}";
 const EXTNAME_JS = "**/*.js";
@@ -398,8 +399,9 @@ const TRANS_EXCLUDE =
   "**/{*.min.js,*shiv.js,*respond.js,*shim.js,.gitignore,.pidTmp,*.css,*.jpg,*.jpeg,*.png,*.gif,*.bat,*.cgi}";
 
 const IGNORE_REGEXP = [
-  /^[\s0-9]*$/,
+  /^[a-z]*[0-9]+[a-z]*$/i,
   /^[a-z]$/i,
+  /^(mac|ip|TPC|QVLAN|VLAN|SSID|PPPoE|WPA|WPA2|WPA2-PSK|WPA-PSK|WEP|TKIP|AES|TKIP&AES|N\/A|mBPS|KB\/s|ping|UPnP|ASCII|hex|APSD|)$/i,
   /<%([\s\S]*)%>/i,
   /\(\[([\s\S]*)\]\)/i,
   /^(&nbsp;)+$/i,

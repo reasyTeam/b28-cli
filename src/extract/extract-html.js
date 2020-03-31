@@ -120,6 +120,12 @@ class ExtractHTML extends Extract {
           return;
         }
 
+        // noscript内的文本不处理
+        if (nodeName === "noscript") {
+          nextSibling && this.listNode(nextSibling);
+          return;
+        }
+
         HANDLE_ATTRIBUTE.forEach(attr => {
           curValue = this.getWord(element.getAttribute(attr));
           this.transWord(element, Edit_TYPE.attribute, curValue, attr);
