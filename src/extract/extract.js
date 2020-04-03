@@ -21,6 +21,7 @@ class Extract {
         isTranslate: false,
         isCheckTrans: false,
         baseWritePath: "",
+        oldData: {},
         baseReadPath: "",
         onComplete: null
       },
@@ -154,6 +155,7 @@ class Extract {
       if (this.option.isTranslate || this.option.isCheckTrans) {
         let transVal = this.option.transWords[addValue];
         if (transVal) {
+          delete this.option.oldData[addValue];
           return this.option.isCheckTrans ? "" : transVal;
         }
       }

@@ -71,24 +71,18 @@ function translate() {
 }
 
 function check() {
-  // start({
-  //     commandType: COMMAD.CHECK_TRANSLATE,
-  //     baseCheckPath: './test/TestFile/testData/allTest/translate',
-  //     langJsonPath: './test/TestFile/testData/allTest/translate/lang.json',
-  //     hongPath,
-  //     logPath: './test/TestFile/output/allTest/test'
-  // }).then(data => {
-  //     let t = '';
-  // });
+  start({
+    commandType: COMMAD.CHECK_TRANSLATE,
+    baseCheckPath: "D:/project/AC系列/AC6V4.0-LNK01/AC5_cn_normal_src",
+    langJsonPath: "C:/Users/lenovo/Desktop/out/t.json",
+    hongPath,
+    logPath: "C:/Users/lenovo/Desktop/out"
+  }).then(data => {
+    let t = "";
+  });
 }
 
 function json2excel() {
-  // start({
-  //     commandType: COMMAD.JSON_TO_EXCEL,
-  //     jsonPath: 'C:/Users/moshang/Desktop/srcOut/t.json',
-  //     outExcelPath: ''
-  // });
-
   start({
     commandType: COMMAD.JSON_TO_EXCEL,
     jsonPath: "./test/TestFile/testData/onlyZH.json",
@@ -190,8 +184,12 @@ function transAllFile() {
     let t = data;
   });
 }
+
 module.exports = function() {
-  translateJs();
-  getWords();
-  // transAllFile();
+  let command = "check";
+  switch (command) {
+    case "check":
+      check();
+      break;
+  }
 };

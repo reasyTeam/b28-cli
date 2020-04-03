@@ -46,6 +46,7 @@ class ExtractFile {
     this.option.baseReadPath = correctPath(this.option.baseReadPath);
     this.option.baseWritePath = correctPath(this.option.baseWritePath);
     this.option.hongPath = correctPath(this.option.hongPath);
+    this.oldData = Object.assign({}, this.option.transWords || {});
 
     console.log("hongpath", this.option.hongPath);
 
@@ -81,6 +82,7 @@ class ExtractFile {
       isCheckTrans: this.option.isCheckTrans,
       baseWritePath: this.option.baseWritePath,
       baseReadPath: this.option.baseReadPath,
+      oldData: this.oldData,
       onComplete: (filePath, words) => {
         if (words.length > 0) {
           if (this.option.needFilePath) {
@@ -98,6 +100,7 @@ class ExtractFile {
       isTranslate: this.option.isTranslate,
       isCheckTrans: this.option.isCheckTrans,
       baseWritePath: this.option.baseWritePath,
+      oldData: this.oldData,
       baseReadPath: this.option.baseReadPath,
       onComplete: (filePath, words) => {
         if (words.length > 0) {
@@ -117,6 +120,7 @@ class ExtractFile {
       isCheckTrans: this.option.isCheckTrans,
       baseWritePath: this.option.baseWritePath,
       baseReadPath: this.option.baseReadPath,
+      oldData: this.oldData,
       onComplete: (filePath, words) => {
         if (words.length > 0) {
           if (this.option.needFilePath) {
@@ -173,6 +177,20 @@ class ExtractFile {
           (this.option.isTranslate ? "未匹配的词条" : "提取词条") +
             `${sheetName}.xlsx`
         );
+
+        if (this.option.isCheckTrans) {
+          this.outData.unshift(
+            "[----B28-CLI----#----在代码中存在但是json中不存在的词条----#----B28-CLI----]"
+          );
+          this.outData.push(
+            "[----B28-CLI----#----在json中存在但是代码中不存在的词条----#----B28-CLI----]"
+          );
+          for (let key in this.oldData) {
+            if (this.oldData.hasOwnProperty(key)) {
+              this.outData.push(key);
+            }
+          }
+        }
 
         if (this.outData.length > 0) {
           this.outData = Array.from([...new Set(this.outData)][0]);
