@@ -11,7 +11,7 @@ function getWords() {
     baseReadPath: "C:/Users/lenovo/Desktop/trans",
     baseOutPath: "C:/Users/lenovo/Desktop/trans",
     hongPath
-  }).then(data => {
+  }).then((data) => {
     let t = data;
   });
 
@@ -52,7 +52,7 @@ function translate() {
     sheetName: "",
     keyName: "EN",
     valueName: "CN"
-  }).then(data => {
+  }).then((data) => {
     let t = "";
   });
 
@@ -77,7 +77,7 @@ function check() {
     langJsonPath: "C:/Users/lenovo/Desktop/out/t.json",
     hongPath,
     logPath: "C:/Users/lenovo/Desktop/out"
-  }).then(data => {
+  }).then((data) => {
     let t = "";
   });
 }
@@ -115,7 +115,7 @@ function origin() {
     commandType: COMMAD.ORIGINAL_CODE,
     baseProPath: "./test/TestFile/origin",
     baseProOutPath: "./test/TestFile/output/origin"
-  }).then(data => {
+  }).then((data) => {
     // return expect(data).toEqual(words);
   });
 }
@@ -129,7 +129,7 @@ function vueGet() {
     baseOutPath: "C:/Users/lenovo/Desktop/output",
     // baseOutPath: './test/vue/output',
     hongPath
-  }).then(data => {
+  }).then((data) => {
     let t = data;
   });
 }
@@ -144,7 +144,7 @@ function vueTrans() {
     sheetName: "",
     keyName: "EN",
     valueName: "CN"
-  }).then(data => {
+  }).then((data) => {
     let t = data;
   });
 }
@@ -159,7 +159,7 @@ function translateJs() {
     sheetName: "",
     keyName: "EN",
     valueName: "CN"
-  }).then(data => {
+  }).then((data) => {
     let t = "";
   });
 }
@@ -170,7 +170,7 @@ function getAllSrc() {
     baseReadPath: "C:/Users/lenovo/Desktop/trans/src",
     baseOutPath: "C:/Users/lenovo/Desktop/trans/out",
     hongPath
-  }).then(data => {
+  }).then((data) => {
     let t = data;
   });
 }
@@ -180,16 +180,25 @@ function transAllFile() {
     commandType: COMMAD.TRANS_ENCODE,
     transFilePath: "C:/Users/lenovo/Desktop/trans/out",
     transOutPath: "C:/Users/lenovo/Desktop/trans/out"
-  }).then(data => {
+  }).then((data) => {
     let t = data;
   });
 }
 
-module.exports = function() {
-  let command = "check";
+module.exports = function () {
+  let command = "excel2json";
   switch (command) {
     case "check":
       check();
+      break;
+    case "excel2json":
+      start({
+        commandType: COMMAD.EXCEL_TO_JSON,
+        keyName: "EN",
+        valueName: "CN",
+        excelPath: "C:/Users/lenovo/Desktop/mw6.xlsx",
+        outJsonPath: "C:/Users/lenovo/Desktop"
+      });
       break;
   }
 };

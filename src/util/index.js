@@ -107,10 +107,10 @@ function loadFile(src) {
 
 function loadJson(src) {
   return loadFile(src)
-    .then(data => {
+    .then((data) => {
       return JSON.parse(data);
     })
-    .catch(err => {
+    .catch((err) => {
       log(err.error, LOG_TYPE.error);
       return {};
     });
@@ -127,7 +127,7 @@ function loadJsonSync(src) {
 function writeJson(data, outPath) {
   createFolder(path.dirname(outPath));
   return new Promise((resolve, reject) => {
-    fs.writeFile(outPath, JSON.stringify(data, "", 2), err => {
+    fs.writeFile(outPath, JSON.stringify(data, "", 2), (err) => {
       if (err) {
         reject(err);
         return;
@@ -182,26 +182,27 @@ function log(message, type = LOG_TYPE.LOG) {
 function loadExcel(xlsxPath, sheetName) {
   let data = xlsx.parse(xlsxPath);
   let outData = [];
-  data.forEach(item => {
+  for (let i = 0, l = data.length; i < l; i++) {
+    let item = data[i];
     if (sheetName) {
       if (item.name === sheetName) {
         outData = item.data;
-        return false;
+        break;
       }
       outData = [];
     } else {
       outData = item.data;
-      return false;
+      break;
     }
-  });
-  outData = outData.filter(item => item.length > 0);
+  }
+  outData = outData.filter((item) => item.length > 0);
   return outData;
 }
 
 function writeExcel(data, outPath, sheetName) {
   createFolder(path.dirname(outPath));
   if (data && data.length > 0 && typeof data[0] !== "object") {
-    data = data.map(item => [item]);
+    data = data.map((item) => [item]);
   }
 
   let buffer = xlsx.build([
@@ -212,7 +213,7 @@ function writeExcel(data, outPath, sheetName) {
   ]);
 
   return new Promise((resolve, reject) => {
-    fs.writeFile(outPath, buffer, err => {
+    fs.writeFile(outPath, buffer, (err) => {
       if (err) {
         reject(err);
         return;
@@ -289,7 +290,7 @@ function mergeObject(main, other) {
 function partMerge(obj, main) {
   let outData = {};
   if (getType(main) === "Array") {
-    main.map(item => {
+    main.map((item) => {
       outData[item] = obj[item] || "";
     });
   } else {
@@ -304,9 +305,9 @@ function scanFolder(folder) {
   var fileList = [],
     folderList = [],
     itemList = [],
-    walk = function(folder, fileList, folderList) {
+    walk = function (folder, fileList, folderList) {
       var files = fs.readdirSync(folder);
-      files.forEach(function(item) {
+      files.forEach(function (item) {
         var tmpPath = folder + "/" + item,
           stats = fs.statSync(tmpPath);
 

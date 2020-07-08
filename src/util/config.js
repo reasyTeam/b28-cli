@@ -80,7 +80,7 @@ const baseQuestions = [
       name: "commandType",
       message: "当前执行的操作是：",
       choices: COMMAD_TEXT,
-      filter: function(val) {
+      filter: function (val) {
         return COMMAD_TEXT.indexOf(val);
       },
       pageSize: 9
@@ -388,7 +388,7 @@ const baseQuestions = [
   ];
 
 const EXCLUDE_FILE =
-  "**/{img,images,lang,b28,goform,cgi-bin,css,OEM_CONFIG}/**";
+  "**/{img,images,lang,b28,goform,node_modules,cgi-bin,css,node_modules,OEM_CONFIG}/**";
 const EXCLUDE_FILE_END =
   "**/{img,lang,b28,goform,cgi-bin,*.min.js,*shiv.js,*respond.js,*shim.js,.gitignore,.pidTmp,*.css,*.jpg,*.png,*.gif,*.bat,*.cgi}";
 const EXTNAME_JS = "**/*.js";
