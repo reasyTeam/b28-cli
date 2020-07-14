@@ -186,7 +186,7 @@ function transAllFile() {
 }
 
 module.exports = function () {
-  let command = "excel2json";
+  let command = "trans";
   switch (command) {
     case "check":
       check();
@@ -198,6 +198,35 @@ module.exports = function () {
         valueName: "CN",
         excelPath: "C:/Users/lenovo/Desktop/mw6.xlsx",
         outJsonPath: "C:/Users/lenovo/Desktop"
+      });
+      break;
+    case "trans":
+      start({
+        commandType: COMMAD.TRANSLATE,
+        baseTranslatePath: "C:/Users/lenovo/Desktop/transTest/error/src",
+        baseTransOutPath: "C:/Users/lenovo/Desktop/transTest/error/out",
+        languagePath: "C:/Users/lenovo/Desktop/transTest/error/lan.xlsx",
+        hongPath: "",
+        sheetName: "",
+        keyName: "EN",
+        valueName: "CN"
+      });
+      // start({
+      //   commandType: COMMAD.TRANSLATE,
+      //   baseTranslatePath: "C:/Users/lenovo/Desktop/transTest/src",
+      //   baseTransOutPath: "C:/Users/lenovo/Desktop/transTest/out",
+      //   languagePath: "C:/Users/lenovo/Desktop/transTest/lan.xlsx",
+      //   hongPath: "",
+      //   sheetName: "",
+      //   keyName: "EN",
+      //   valueName: "CN"
+      // });
+      break;
+    case "getLan":
+      start({
+        commandType: COMMAD.GET_WORDS,
+        baseReadPath: "C:/Users/lenovo/Desktop/transTest/error/src",
+        baseOutPath: "C:/Users/lenovo/Desktop/transTest/error"
       });
       break;
   }

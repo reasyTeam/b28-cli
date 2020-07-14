@@ -26,7 +26,7 @@ const decodingMap = {
 };
 const encodedAttr = /&(?:lt|gt|quot|amp|#39);/g;
 const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#39|#10|#9);/g;
-const bindRE = /^:|^v-bind:/;
+const bindRE = /^:|^v-bind:|^v-html/;
 
 const regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g;
 const buildRegex = (delimiters, full) => {
@@ -56,12 +56,13 @@ export function parseText(text, delimiters) {
       });
     }
 
+    let startEmptyLength = /^\s*/g.exec(match[1])[0].length;
     const exp = match[1].trim();
     tokens.push({
       value: exp,
       directive: true,
-      start: index + delimiters[0].length,
-      end: index + delimiters[0].length + exp.length
+      start: index + startEmptyLength + delimiters[0].length,
+      end: index + startEmptyLength + delimiters[0].length + exp.length
     });
     lastIndex = index + match[0].length;
   }
@@ -90,7 +91,7 @@ function parseExp(tocken, offset = 0) {
 
   ast = ast.program.body;
   let tockens = [];
-  ast.forEach(item => {
+  ast.forEach((item) => {
     if (typeof item === "object" && item.type === "ExpressionStatement") {
       tockens.push(...parseOperation(item.expression));
     }
@@ -126,6 +127,13 @@ function parseExp(tocken, offset = 0) {
               end: ast.arguments[0].end - 1 + start,
               value: ast.arguments[0].value
             });
+
+            // 解析参数
+            if (ast.arguments.length > 1) {
+              for (let i = 1; i < ast.arguments.length; i++) {
+                tockens.push(...parseOperation(ast.arguments[i]));
+              }
+            }
           }
         } else {
           tockens.push({
@@ -138,6 +146,11 @@ function parseExp(tocken, offset = 0) {
       case "ConditionalExpression":
         tockens.push(...parseOperation(ast.consequent));
         tockens.push(...parseOperation(ast.alternate));
+        break;
+      case "ArrayExpression":
+        ast.elements.forEach((item) => {
+          tockens.push(...parseOperation(item));
+        });
         break;
       default:
         tockens.push({
@@ -266,7 +279,7 @@ function parseHTML(html, options) {
           "([\\s\\S]*?)(</" + stackedTag + "[^>]*>)",
           "i"
         ));
-      const rest = html.replace(reStackedTag, function() {
+      const rest = html.replace(reStackedTag, function () {
         return "";
       });
       index += html.length - rest.length;
@@ -340,13 +353,13 @@ function parseTemplate(template, target) {
   parseHTML(template, {
     start(attrs) {
       let word = "";
-      attrs.forEach(attr => {
+      attrs.forEach((attr) => {
         if (attr.directive) {
           let offset = template.slice(attr.start, attr.end).indexOf(attr.value);
           let tockens = parseExp(attr, offset);
           let outData = listModuleTockens(tockens, attr.value);
           if (outData.isTrans) {
-            outData.trans.forEach(item => {
+            outData.trans.forEach((item) => {
               word = getWord(item.value);
               if (word && word !== item.value) {
                 langs.push({
@@ -382,7 +395,7 @@ function parseTemplate(template, target) {
         textArr = [];
 
       if ((tockens = parseText(text, delimiters))) {
-        tockens.forEach(tocken => {
+        tockens.forEach((tocken) => {
           if (tocken.directive) {
             let asts = parseExp(tocken);
             textArr.push(listModuleTockens(asts, text));
@@ -406,12 +419,12 @@ function parseTemplate(template, target) {
           } else {
             if (tocken.isTrans) {
               hasTrans = true;
-              tocken.trans.forEach(item => {
+              tocken.trans.forEach((item) => {
                 oldWord = item.value;
                 let newStart = start + item.start;
                 let newEnd = newStart + item.value.length;
 
-                word = getWord(oldWord);
+                // word = getWord(oldWord);
                 if ((word = getWord(oldWord))) {
                   if (word !== oldWord) {
                     langs.push({
@@ -472,7 +485,7 @@ function parseTemplate(template, target) {
   });
 
   let offset = 0;
-  langs.forEach(item => {
+  langs.forEach((item) => {
     if (process.env.NODE_ENV === "dev") {
       console.log(
         `[test:][${template.slice(item.start + offset, item.end + offset)}]`
