@@ -14,7 +14,7 @@ function merge(obj, ...others) {
     obj
   );
   if (others) {
-    others.forEach(itemObj => {
+    others.forEach((itemObj) => {
       outData = mergeObject(outData, itemObj);
     });
   }
@@ -23,29 +23,29 @@ function merge(obj, ...others) {
 
 function mergeJson(main, file, outPath, action = 1) {
   let promises = [];
-  file.split(",").forEach(item => {
+  file.split(",").forEach((item) => {
     promises.push(loadJson(item));
   });
   promises.push(loadJson(main));
 
   return Promise.all(promises)
-    .then(data => {
+    .then((data) => {
       if (action == 1) {
         return partMerge(data[0], data[1]);
       }
       return merge(...data);
     })
-    .then(data => {
+    .then((data) => {
       if (!path.extname(outPath)) {
         outPath = path.join(outPath, "merge.json");
       }
 
       return writeJson(data, outPath)
-        .then(data => {
+        .then((data) => {
           log(`Merge Json 文件已写入地址-${outPath}`);
           return data;
         })
-        .catch(error => {
+        .catch((error) => {
           log(`Merge Json 失败，${error}`, LOG_TYPE.ERROT);
           return {};
         });

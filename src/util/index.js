@@ -9,6 +9,10 @@ const LOG_TYPE = {
   DONE: 4
 };
 
+/**
+ * 对字符串重新编码，字符串前面加上8位的特殊编码
+ * @param {String} key 需要进行重新编码的字符串
+ */
 function formatKey(key) {
   let arr = [
       "a",
@@ -77,6 +81,10 @@ function formatKey(key) {
   );
 }
 
+/**
+ * 对重新编码的字符串进行解码
+ * @param {String} key 需要解码的字符串
+ */
 function decodeKey(key) {
   if (!key) {
     return "";
@@ -92,6 +100,11 @@ function getDirname(filePath) {
   return filePath;
 }
 
+/**
+ * 异步加载json文件
+ * 返回Promise，
+ * @param {String} src 文件绝对路径
+ */
 function loadFile(src) {
   return new Promise((resolve, reject) => {
     fs.readFile(src, "utf8", (err, data) => {
@@ -105,6 +118,11 @@ function loadFile(src) {
   });
 }
 
+/**
+ * 异步加载json文件
+ * 返回Promise，参数为Object
+ * @param {String} src 文件绝对路径
+ */
 function loadJson(src) {
   return loadFile(src)
     .then((data) => {
@@ -116,6 +134,11 @@ function loadJson(src) {
     });
 }
 
+/**
+ * 同步加载json文件
+ * 返回Promise，参数为Object
+ * @param {String} src 文件绝对路径
+ */
 function loadJsonSync(src) {
   try {
     return JSON.parse(fs.readFileSync(src));
@@ -163,6 +186,11 @@ var styles = {
   yellowBG: ["\x1B[43m", "\x1B[49m"]
 };
 
+/**
+ * 不同类型的日志打印
+ * @param {String} message 日志信息
+ * @param {Number} type 日志类型
+ */
 function log(message, type = LOG_TYPE.LOG) {
   let logText = ["", "Warning", "Error", "Log", "Success"];
   message = `[${logText[type]}][${message}]`;
@@ -179,6 +207,10 @@ function log(message, type = LOG_TYPE.LOG) {
   }
 }
 
+/**
+ * 读取excel
+ * @param {String} xlsxPath excel文件地址
+ */
 function loadExcel(xlsxPath, sheetName) {
   let data = xlsx.parse(xlsxPath);
   let outData = [];
@@ -199,6 +231,11 @@ function loadExcel(xlsxPath, sheetName) {
   return outData;
 }
 
+/**
+ *
+ * @param {Array} data 写入excel中的数据
+ * @param {String} outPath 导出的excel文件名+地址(绝对路径)
+ */
 function writeExcel(data, outPath, sheetName) {
   createFolder(path.dirname(outPath));
   if (data && data.length > 0 && typeof data[0] !== "object") {
@@ -224,6 +261,7 @@ function writeExcel(data, outPath, sheetName) {
 }
 
 function writeTextFile(filename, content) {
+  //以文本形式写入
   createFolder(path.dirname(filename));
   fs.writeFileSync(filename, content);
 }
@@ -235,10 +273,12 @@ function createFolder(folder) {
     if (fs.existsSync(folder)) return;
 
     while (!fs.existsSync(folder + "/..")) {
+      //检查父目录是否存在
       folder += "/..";
     }
 
     while (originDir.length <= folder.length) {
+      //如果目录循环创建完毕，则跳出循环
       fs.mkdirSync(folder, "0777");
       folder = folder.substring(0, folder.length - 3);
     }
@@ -247,6 +287,11 @@ function createFolder(folder) {
   }
 }
 
+/**
+ * 深度合并
+ * @param {Object} oldObj 被合并对象
+ * @param {Object} newObj 合并对象
+ */
 function deepMerge(oldObj, newObj) {
   for (let key in newObj) {
     if (newObj.hasOwnProperty(key)) {
@@ -287,6 +332,7 @@ function mergeObject(main, other) {
   return main;
 }
 
+// 部分合并
 function partMerge(obj, main) {
   let outData = {};
   if (getType(main) === "Array") {
@@ -301,6 +347,9 @@ function partMerge(obj, main) {
   return outData;
 }
 
+/**
+ * 扫描文件夹内的文件
+ */
 function scanFolder(folder) {
   var fileList = [],
     folderList = [],
@@ -338,6 +387,7 @@ function createFolder(folder, callback) {
     let list = [folder];
     folder = path.dirname(folder);
     while (!fs.existsSync(folder)) {
+      //检查父目录是否存在
       list.push(folder);
       folder = path.dirname(folder);
     }
@@ -357,6 +407,9 @@ function copyFile(src, dist) {
   fs.createReadStream(src).pipe(fs.createWriteStream(dist));
 }
 
+/**
+ * 修正路劲
+ */
 function correctPath(filePath) {
   filePath += "";
 
@@ -364,9 +417,14 @@ function correctPath(filePath) {
     filePath = path.join(process.cwd(), filePath);
     console.log(filePath);
   }
+
+  // windows平台支持\和/，POSIX上是/
   return filePath.replace(/\\/g, "/");
 }
 
+/**
+ * 移除空格
+ */
 function trim(text) {
   return text.replace(/(^\s+)|(\s+$)/g, "");
 }

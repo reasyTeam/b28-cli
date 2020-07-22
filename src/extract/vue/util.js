@@ -1,6 +1,9 @@
+/**
+ * 不执行任何操作
+ */
 function noop(a, b, c) {}
 
-const no = a => false;
+const no = (a) => false;
 
 function makeMap(str, expectsLowerCase) {
   var map = Object.create(null);
@@ -9,10 +12,10 @@ function makeMap(str, expectsLowerCase) {
     map[list[i]] = true;
   }
   return expectsLowerCase
-    ? function(val) {
+    ? function (val) {
         return map[val.toLowerCase()];
       }
-    : function(val) {
+    : function (val) {
         return map[val];
       };
 }

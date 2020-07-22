@@ -4,6 +4,9 @@ import { log, LOG_TYPE, trim } from "../util/index";
 import ExtractJS from "./extract_js_ori";
 import Extract from "./extract";
 
+/**
+ * HTML解析
+ */
 class ExtractHTML extends Extract {
   constructor(option) {
     super(option);
@@ -21,6 +24,7 @@ class ExtractHTML extends Extract {
     this.getHeaderTag(html);
     return new Promise((resolve, reject) => {
       try {
+        // 将jsdom的控制台信息进行拦截，不在node的控制台进行输出
         const virtualConsole = new jsdom.VirtualConsole();
         let dom = new JSDOM(html, {
           virtualConsole
@@ -38,10 +42,13 @@ class ExtractHTML extends Extract {
     this.hasBody = !!html.match(/\<body([^>]*)\>/g);
   }
 
+  // 扫描节点，提取字段
   scanNode(document) {
+    // 遍历各节点
     this.listNode(document.documentElement);
 
     return this.nextJsTask().then(() => {
+      // ͨ通过正则替换，为了规避jsdom对html中的特殊字符串进行编码
       let outHtml = document.documentElement.innerHTML;
       let match = outHtml.match(/<script\b[^>]*>[\s\S]*?<\/script>/g);
       outHtml = this.oldHtml.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, () =>
@@ -55,10 +62,11 @@ class ExtractHTML extends Extract {
   handleJsTask(child) {
     return this.extractJS
       .transNode(child.nodeValue, true)
-      .then(AST => {
+      .then((AST) => {
         return this.extractJS.scanNode(AST);
       })
-      .then(fileData => {
+      .then((fileData) => {
+        // 写入文件
         child.nodeValue = fileData;
         return this.nextJsTask();
       })
@@ -68,6 +76,7 @@ class ExtractHTML extends Extract {
   }
 
   nextJsTask() {
+    // 当一个文件执行完成，立即执行下一个指令
     if (this.jsHandleList.length > 0) {
       return this.handleJsTask(this.jsHandleList.shift());
     }
@@ -87,16 +96,20 @@ class ExtractHTML extends Extract {
       nextSibling = element.nextSibling,
       nodeType = element.nodeType,
       nodeName = element.nodeName.toLowerCase();
+    // 处理html节点
+    // nodeType: 1-元素 2-属性 3-文本内容 8-代表注释
     if (nodeType === 1 && nodeName == "script") {
       if (firstChild && firstChild.nodeValue && trim(firstChild.nodeValue)) {
         this.addJsTask(firstChild);
       }
     } else {
+      // 处理子节点
       if (firstChild) {
         this.listNode(firstChild);
       }
     }
 
+    // 处理兄弟节点
     if (nextSibling) {
       this.listNode(nextSibling);
     }

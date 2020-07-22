@@ -1,3 +1,4 @@
+// 参考vue-template-compiler进行sfc文件解析
 import { shouldIgnoreFirstNewline, makeMap, unicodeRegExp } from "./util";
 const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
 const dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
@@ -25,6 +26,7 @@ function parseHTML(html, options) {
     if (!lastTag || !isPlainTextElement(lastTag)) {
       let textEnd = html.indexOf("<");
       if (textEnd === 0) {
+        // 注释
         if (comment.test(html)) {
           let commentEnd = html.indexOf("-->");
 
@@ -33,6 +35,7 @@ function parseHTML(html, options) {
             continue;
           }
         }
+        // 条件注释
         if (conditionalComment.test(html)) {
           let conditionalEnd = html.indexOf("]>");
 
@@ -42,12 +45,14 @@ function parseHTML(html, options) {
           }
         }
 
+        // Doctype:
         let doctypeMatch = html.match(doctype);
         if (doctypeMatch) {
           advance(doctypeMatch[0].length);
           continue;
         }
 
+        // 结束tag
         let endTagMatch = html.match(endTag);
         if (endTagMatch) {
           let curIndex = index;
@@ -56,6 +61,7 @@ function parseHTML(html, options) {
           continue;
         }
 
+        // 开始tag
         let startTagMatch = parseStartTag();
         if (startTagMatch) {
           handleStartTag(startTagMatch);
@@ -72,12 +78,14 @@ function parseHTML(html, options) {
 
       if (textEnd >= 0) {
         rest = html.slice(textEnd);
+        // 提取文本中的<, 该符号不作为标签进行提取
         while (
           !endTag.test(rest) &&
           !startTagOpen.test(rest) &&
           !comment.test(rest) &&
           !conditionalComment.test(rest)
         ) {
+          // < in plain text, be forgiving and treat it as text
           next = rest.indexOf("<", 1);
           if (next < 0) {
             break;
@@ -102,7 +110,7 @@ function parseHTML(html, options) {
             "([\\s\\S]*?)(</" + stackedTag + "[^>]*>)",
             "i"
           ));
-      let rest$1 = html.replace(reStackedTag, function(all, text, endTag) {
+      let rest$1 = html.replace(reStackedTag, function (all, text, endTag) {
         endTagLength = endTag.length;
         return "";
       });
@@ -216,7 +224,11 @@ function parseHTML(html, options) {
 
 let isSpecialTag = makeMap("script,style,template", true);
 
+/**
+ * 解析单文件组件(*.vue)输出SFC描述对象
+ */
 function parseComponent(content) {
+  // SFC描述对象
   let sfc = {
       template: null,
       script: null,
@@ -224,10 +236,11 @@ function parseComponent(content) {
       customBlocks: [],
       errors: []
     },
+    // 记录节点深度，深度为1的节点为template/script/style等
     depth = 0,
     currentBlock = null;
 
-  let warn = function(msg) {
+  let warn = function (msg) {
     sfc.errors.push(msg);
   };
 

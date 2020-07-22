@@ -56,7 +56,8 @@ async function ExtractLangExcel(words, jsonPath, outPath) {
     "lang" + +getNowFormatDate() + ".xlsx"
   );
 
-  words.forEach(function(item, index) {
+  // 每一行的数据存在一个数组中，二维数组outData是完整的数据，用来最终生成excel文件
+  words.forEach(function (item, index) {
     outData[index] = [];
     outData[index].push(item);
   });
@@ -80,9 +81,10 @@ async function ExtractLangExcel(words, jsonPath, outPath) {
 }
 
 function getExcelData(words, outData, filePath, dataIndex) {
-  return loadJson(filePath).then(function(data) {
+  return loadJson(filePath).then(function (data) {
     data = trimJson(data);
-    words.forEach(function(item, wordIndex) {
+    // data是json文件的值，json对象
+    words.forEach(function (item, wordIndex) {
       item = trimStr(item);
       if (wordIndex == "0") {
         return true;
@@ -108,10 +110,7 @@ function trimJson(jsonObj) {
     leftReg = /\"\s+/g,
     rightReg = /\s+\"/g,
     btwReg = /\s{2,}/g;
-  str = str
-    .replace(leftReg, '"')
-    .replace(rightReg, '"')
-    .replace(btwReg, " ");
+  str = str.replace(leftReg, '"').replace(rightReg, '"').replace(btwReg, " ");
   unescape(str);
   return JSON.parse(str);
 }
@@ -120,10 +119,7 @@ function trimStr(str) {
   let leftReg = /\"\s+/g,
     rightReg = /\s+\"/g,
     btwReg = /\s{2,}/g;
-  str = str
-    .replace(leftReg, '"')
-    .replace(rightReg, '"')
-    .replace(btwReg, " ");
+  str = str.replace(leftReg, '"').replace(rightReg, '"').replace(btwReg, " ");
   unescape(str);
   return str;
 }

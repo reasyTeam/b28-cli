@@ -13,6 +13,9 @@ const Edit_TYPE = {
   title: 5
 };
 
+/**
+ * HTML文件解析类
+ */
 class ExtractHTML extends Extract {
   constructor(option) {
     super(option);
@@ -32,6 +35,7 @@ class ExtractHTML extends Extract {
 
     return new Promise((resolve, reject) => {
       try {
+        // 将jsdom的控制台信息进行拦截，不在node的控制台进行输出
         const virtualConsole = new jsdom.VirtualConsole();
         let dom = new JSDOM(html, {
           virtualConsole
@@ -49,6 +53,7 @@ class ExtractHTML extends Extract {
     this.hasBody = !!html.match(/\<body([^>]*)\>/g);
   }
 
+  // 扫描节点，提取字段
   scanNode(document) {
     this.listNode(document.documentElement);
 
@@ -81,14 +86,18 @@ class ExtractHTML extends Extract {
       nodeName = element.nodeName.toLowerCase(),
       btnStr = "submit,reset,button",
       curValue;
+    //处理html节点
+    // nodeType: 1-元素 2-属性 3-文本内容 8-代表注释
     switch (nodeType) {
-      case 1:
+      case 1: // 处理html元素
         let hong = element.getAttribute("data-hong"),
           isInputButton =
             nodeName == "input" &&
             btnStr.includes(element.getAttribute("type")),
+          // 组件配置的dataOption属性
           dataOption = element.getAttribute("data-options");
 
+        // 如果属于宏控制功能，宏没开启是不会进行提取或翻译操作
         if (hong && this.CONFIG_HONG[hong] === false) {
           if (nextSibling) {
             this.listNode(nextSibling);
@@ -96,7 +105,9 @@ class ExtractHTML extends Extract {
           return;
         }
 
+        // 标志为一个整体的html，将全部提取，不进行子元素的拆分提取操作
         if (element.getAttribute("data-nowrap") == 1) {
+          // 将换行符，多个空格合并成一个空格进行提取
           curValue = this.getWord(element.innerHTML);
           this.transWord(element, Edit_TYPE.html, curValue);
 
@@ -126,7 +137,7 @@ class ExtractHTML extends Extract {
           return;
         }
 
-        HANDLE_ATTRIBUTE.forEach(attr => {
+        HANDLE_ATTRIBUTE.forEach((attr) => {
           curValue = this.getWord(element.getAttribute(attr));
           this.transWord(element, Edit_TYPE.attribute, curValue, attr);
         });
@@ -134,12 +145,14 @@ class ExtractHTML extends Extract {
         if (isInputButton) {
           curValue = this.getWord(element.value);
           this.transWord(element, Edit_TYPE.value, curValue);
+          //data-lang属性具有较高优先级
           if (element.getAttribute("data-lang")) {
             curValue = this.getWord(element.getAttribute("data-lang"));
             this.transWord(element, Edit_TYPE.attribute, curValue, "data-lang");
           }
         } else if (dataOption) {
           try {
+            // todo by xc 这种规格以后应该去掉
             curValue = JSON.parse(dataOption);
             curValue.msg = this.getWord(curValue.msg);
             curValue.msg &&
@@ -157,7 +170,7 @@ class ExtractHTML extends Extract {
           this.transWord(element, Edit_TYPE.attribute, curValue, "data-lang");
         }
         break;
-      case 3:
+      case 3: //处理文本节点
         if (/\S/.test(element.nodeValue)) {
           curValue = this.getWord(element.nodeValue);
           this.transWord(element, Edit_TYPE.nodeValue, curValue);
@@ -165,21 +178,25 @@ class ExtractHTML extends Extract {
         break;
     }
 
+    //stop handle elem.child if elem has attr data-lang
+    // 处理子节点
     firstChild && this.listNode(firstChild);
+
+    // 处理兄弟节点
     nextSibling && this.listNode(nextSibling);
   }
 
   handleJsTask(child) {
     return this.extractJS
       .transNode(child.nodeValue)
-      .then(AST => {
+      .then((AST) => {
         return this.extractJS.scanNode(AST);
       })
-      .then(fileData => {
+      .then((fileData) => {
         child.nodeValue = fileData;
         return this.nextJsTask();
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(error);
         log(`内联JS处理出错- ${error}`, LOG_TYPE.error);
         return this.nextJsTask();
@@ -187,9 +204,11 @@ class ExtractHTML extends Extract {
   }
 
   nextJsTask() {
+    // 当一个文件执行完成，立即执行下一个指令
     if (this.jsHandleList.length > 0) {
       return this.handleJsTask(this.jsHandleList.shift());
     }
+    // 当所有的js遍历完成后，添加抓取到的词条
     this.addWords(this.extractJS.words);
     this.extractJS.words = [];
     return Promise.resolve("done");
@@ -199,6 +218,7 @@ class ExtractHTML extends Extract {
     this.jsHandleList.push(handle);
   }
 
+  // 翻译节点
   transWord(element, type, value, field) {
     if (value) {
       switch (type) {

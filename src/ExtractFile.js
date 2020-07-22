@@ -51,7 +51,9 @@ class ExtractFile {
     console.log("hongpath", this.option.hongPath);
 
     this.fileList = {
+      // 需要进行提取和翻译的文件
       transList: [],
+      // 不需要翻译，直接进行copy的文件
       copyList: [],
       folders: []
     };
@@ -82,6 +84,7 @@ class ExtractFile {
       isCheckTrans: this.option.isCheckTrans,
       baseWritePath: this.option.baseWritePath,
       baseReadPath: this.option.baseReadPath,
+      // 词条提取完成后的操作
       oldData: this.oldData,
       onComplete: (filePath, words) => {
         if (words.length > 0) {
@@ -102,6 +105,7 @@ class ExtractFile {
       baseWritePath: this.option.baseWritePath,
       oldData: this.oldData,
       baseReadPath: this.option.baseReadPath,
+      // 词条提取完成后的操作
       onComplete: (filePath, words) => {
         if (words.length > 0) {
           if (this.option.needFilePath) {
@@ -120,6 +124,7 @@ class ExtractFile {
       isCheckTrans: this.option.isCheckTrans,
       baseWritePath: this.option.baseWritePath,
       baseReadPath: this.option.baseReadPath,
+      // 词条提取完成后的操作
       oldData: this.oldData,
       onComplete: (filePath, words) => {
         if (words.length > 0) {
@@ -143,12 +148,15 @@ class ExtractFile {
       this.addFile(this.option.baseReadPath);
     }
 
-    this.fileList.transList.forEach(filePath => {
+    this.fileList.transList.forEach((filePath) => {
       if (minimatch(filePath, EXTNAME_JS)) {
+        // js文件
         this.extractJS.addTask(filePath);
       } else if (minimatch(filePath, EXTNAME_HTML)) {
+        // html文件
         this.extractHTML.addTask(filePath);
       } else if (minimatch(filePath, EXTNAME_VUE)) {
+        // vue文件
         this.extractVUE.addTask(filePath);
       } else {
         this.fileList.copyList.push(filePath);
@@ -159,8 +167,10 @@ class ExtractFile {
       this.copyFile();
     }
 
+    // 将未翻译的文件以错误的形式输出
+    // 将提取的词条文件，输出为excel
     return Promise.all(this.startHandle())
-      .then(data => {
+      .then((data) => {
         let sheetName = this.extractJS.option.onlyZH ? "CN" : "EN";
 
         if (this.option.isTranslate) {
@@ -207,11 +217,11 @@ class ExtractFile {
         } else if (this.option.isTranslate || this.option.isCheckTrans) {
           log(`success, 未发现未翻译的词条`, LOG_TYPE.DONE);
         }
-
+        //重置
         this.reset();
         return this.outData;
       })
-      .catch(err => {
+      .catch((err) => {
         log(`文件处理出错，${err}`, LOG_TYPE.ERROR);
       });
   }
@@ -234,7 +244,7 @@ class ExtractFile {
           log(`语言文件输出为-${outPath}`, LOG_TYPE.DONE);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         log(error.message, LOG_TYPE.error);
         let outPath = path.join(
           this.option.baseWritePath,
@@ -270,16 +280,18 @@ class ExtractFile {
   }
 
   copyFile() {
-    this.fileList.folders.forEach(val => {
+    // 拷贝文件
+    this.fileList.folders.forEach((val) => {
       createFolder(
         path.join(
           this.option.baseWritePath,
           path.relative(this.option.baseReadPath, val)
         )
-      );
+      ); //创建目录
     });
 
-    this.fileList.copyList.forEach(filePath => {
+    //如果是翻译模式需要将未匹配的文件原样拷贝
+    this.fileList.copyList.forEach((filePath) => {
       copyFile(
         filePath,
         path.join(
@@ -290,11 +302,12 @@ class ExtractFile {
     });
   }
 
+  //提取文件，并且拷贝不需要操作的文件
   getFileList() {
     var scanData = scanFolder(this.option.baseReadPath);
     this.fileList.folders = scanData.folders;
 
-    scanData.files.forEach(val => {
+    scanData.files.forEach((val) => {
       this.addFile(val);
     });
   }
@@ -303,7 +316,7 @@ class ExtractFile {
     if (
       minimatch(filePath, EXCLUDE_FILE) ||
       minimatch(filePath, EXCLUDE_FILE_END) ||
-      !transFiles.some(itemRE => minimatch(filePath, itemRE))
+      !transFiles.some((itemRE) => minimatch(filePath, itemRE))
     ) {
       if (this.option.isTranslate) {
         this.fileList.copyList.push(filePath);
