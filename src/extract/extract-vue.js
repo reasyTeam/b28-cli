@@ -1,5 +1,6 @@
 import { log, LOG_TYPE, trim } from "../util/index";
 import ExtractJS from "./extract-js";
+import ExtractRegexp from "./extract-regexp";
 import Extract from "./extract";
 import parseComponent from "./vue/vue-compiler";
 import parseHtml from "./vue/html-parser";
@@ -18,9 +19,16 @@ import parseHtml from "./vue/html-parser";
  */
 class ExtractVUE extends Extract {
   constructor(option) {
-    super(option);
+    super(option, 'vue');
 
     this.extractJS = new ExtractJS({
+      CONFIG_HONG: this.option.CONFIG_HONG,
+      onlyZH: this.option.onlyZH,
+      transWords: this.option.transWords,
+      isTranslate: this.option.isTranslate
+    });
+
+    this.extractRegexp = new ExtractRegexp({
       CONFIG_HONG: this.option.CONFIG_HONG,
       onlyZH: this.option.onlyZH,
       transWords: this.option.transWords,
@@ -45,16 +53,36 @@ class ExtractVUE extends Extract {
     return parseComponent(content);
   }
 
-  // 扫描节点，提取字段
   scanNode(sfc) {
     if (sfc.template && sfc.template.content) {
       sfc.template.content = this.parseHtml(sfc.template.content);
     }
+
     if (sfc.script && sfc.script.content) {
+      let isNotJs = false;
+      for (let i = 0; i < sfc.script.attrs.length; i++) {
+        if (
+          sfc.script.attrs[i].name === "lang" &&
+          sfc.script.attrs[i].value !== "" &&
+          sfc.script.attrs[i].value !== "js" &&
+          sfc.script.attrs[i].value !== "javascript"
+        ) {
+          isNotJs = true;
+          break;
+        }
+      }
+
+      if (isNotJs) {
+        return this.handleOtherTask(sfc.script.content).then(() => {
+          return this.generate();
+        });
+      }
+
       return this.handleJsTask(sfc.script.content).then(() => {
         return this.generate();
       });
     }
+
     return Promise.resolve(this.generate());
   }
 
@@ -119,8 +147,25 @@ class ExtractVUE extends Extract {
         return "done";
       })
       .catch((error) => {
+        // console.log(error);
+        log(`vue script处理出错- ${error}，换种方式继续处理`, LOG_TYPE.WARNING);
+        return this.handleOtherTask(content);
+      });
+  }
+
+  handleOtherTask(content) {
+    return this.extractRegexp
+      .scanNode(content)
+      .then((fileData) => {
+        // 写入解析后的内容
+        this.sfc.script.content = fileData;
+        this.addWords(this.extractRegexp.words);
+        this.extractRegexp.words = [];
+        return "done";
+      })
+      .catch((error) => {
         console.log(error);
-        log(`vue script处理出错- ${error}`, LOG_TYPE.error);
+        log(`vue script not lang=js处理出错- ${error}`, LOG_TYPE.error);
         return "done";
       });
   }

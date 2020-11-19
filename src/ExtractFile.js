@@ -3,6 +3,7 @@ import fs from "fs";
 import ExtractHTML from "./extract/extract-html";
 import ExtractJS from "./extract/extract-js";
 import ExtractVUE from "./extract/extract-vue";
+import ExtractRegexp from "./extract/extract-regexp";
 const cp = require("child_process");
 const minimatch = require("minimatch");
 
@@ -20,10 +21,11 @@ import {
   EXCLUDE_FILE,
   EXCLUDE_FILE_END,
   EXTNAME_JS,
+  EXTNAME_OTHER,
   EXTNAME_VUE,
   EXTNAME_HTML
 } from "./util/config";
-let transFiles = [EXTNAME_JS, EXTNAME_VUE, EXTNAME_HTML];
+let transFiles = [EXTNAME_JS, EXTNAME_VUE, EXTNAME_HTML, EXTNAME_OTHER];
 
 class ExtractFile {
   constructor(option) {
@@ -135,6 +137,27 @@ class ExtractFile {
         }
       }
     });
+
+    this.extractRegexp = new ExtractRegexp({
+      CONFIG_HONG: this.CONFIG_HONG,
+      onlyZH: this.option.onlyZH,
+      transWords: this.option.transWords,
+      isTranslate: this.option.isTranslate,
+      isCheckTrans: this.option.isCheckTrans,
+      baseWritePath: this.option.baseWritePath,
+      baseReadPath: this.option.baseReadPath,
+      // 词条提取完成后的操作
+      oldData: this.oldData,
+      onComplete: (filePath, words) => {
+        if (words.length > 0) {
+          if (this.option.needFilePath) {
+            this.outData.push(correctPath(filePath));
+          }
+          this.outData = this.outData.concat(words);
+        }
+      }
+    });
+
     if (this.option.commandType == 8) {
       return this.outData;
     }
@@ -158,6 +181,9 @@ class ExtractFile {
       } else if (minimatch(filePath, EXTNAME_VUE)) {
         // vue文件
         this.extractVUE.addTask(filePath);
+      } else if (minimatch(filePath, EXTNAME_OTHER)) {
+        // 其它文件处理
+        this.extractRegexp.addTask(filePath);
       } else {
         this.fileList.copyList.push(filePath);
       }
@@ -170,7 +196,16 @@ class ExtractFile {
     // 将未翻译的文件以错误的形式输出
     // 将提取的词条文件，输出为excel
     return Promise.all(this.startHandle())
-      .then((data) => {
+      .then((errorList) => {
+        errorList.forEach((item) => {
+          item.length > 0 && this.extractRegexp.addTasks(item);
+        });
+        if(this.extractRegexp.handleList.length > 0){
+        log(`开始重新提取出错文件`, LOG_TYPE.DONE, '## NOTICE ##');
+        }
+        return this.extractRegexp.startTrans();
+      })
+      .then(() => {
         let sheetName = this.extractJS.option.onlyZH ? "CN" : "EN";
 
         if (this.option.isTranslate) {
@@ -267,7 +302,8 @@ class ExtractFile {
     return [
       this.extractHTML.startTrans(),
       this.extractJS.startTrans(),
-      this.extractVUE.startTrans()
+      this.extractVUE.startTrans(),
+      this.extractRegexp.startTrans()
     ];
   }
 

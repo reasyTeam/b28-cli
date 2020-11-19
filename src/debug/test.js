@@ -1,7 +1,7 @@
-import start from "./index";
-import { COMMAD } from "./util/config";
+import start from "../index";
+import { COMMAD } from "../util/config";
 
-const hongPath = "./test/TestFile/config/index.js";
+const hongPath = "../../test/TestFile/config/index.js";
 
 // import arrayToJson from './arrayToJson';
 
@@ -186,7 +186,7 @@ function transAllFile() {
 }
 
 module.exports = function () {
-  let command = "trans";
+  let command= "getLan";
   switch (command) {
     case "check":
       check();
@@ -223,10 +223,21 @@ module.exports = function () {
       // });
       break;
     case "getLan":
+      // start({
+      //   commandType: COMMAD.GET_WORDS,
+      //   // onlyZH: true,
+      //   baseReadPath: "C:/Users/lenovo/Desktop/ts/src",
+      //   baseOutPath: "C:/Users/lenovo/Desktop/ts"
+      // });
       start({
-        commandType: COMMAD.GET_WORDS,
-        baseReadPath: "C:/Users/lenovo/Desktop/transTest/error/src",
-        baseOutPath: "C:/Users/lenovo/Desktop/transTest/error"
+        commandType: COMMAD.TRANSLATE,
+        baseTranslatePath: "C:/Users/lenovo/Desktop/ts/src",
+        baseTransOutPath: "C:/Users/lenovo/Desktop/ts/out",
+        languagePath: "C:/Users/lenovo/Desktop/ts/提取词条EN.xlsx",
+        hongPath: "",
+        sheetName: "",
+        keyName: "CN",
+        valueName: "EN"
       });
       break;
   }

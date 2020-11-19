@@ -18,7 +18,7 @@ const Edit_TYPE = {
  */
 class ExtractHTML extends Extract {
   constructor(option) {
-    super(option);
+    super(option, 'html');
 
     this.extractJS = new ExtractJS({
       CONFIG_HONG: this.option.CONFIG_HONG,

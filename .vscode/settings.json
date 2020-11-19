@@ -2,6 +2,6 @@
   "eslint.options": {
     "configFile": "./.eslintrc.js"
   },
-  "editor.tabSize": 4,
+  "editor.tabSize": 2,
   "prettier.printWidth": 80
 }

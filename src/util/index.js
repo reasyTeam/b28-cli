@@ -191,9 +191,9 @@ var styles = {
  * @param {String} message 日志信息
  * @param {Number} type 日志类型
  */
-function log(message, type = LOG_TYPE.LOG) {
+function log(message, type = LOG_TYPE.LOG, tip) {
   let logText = ["", "Warning", "Error", "Log", "Success"];
-  message = `[${logText[type]}][${message}]`;
+  message = `[${tip || logText[type]}][${message}]`;
 
   switch (type) {
     case LOG_TYPE.WARNING:
@@ -201,6 +201,9 @@ function log(message, type = LOG_TYPE.LOG) {
       break;
     case LOG_TYPE.ERROR:
       console.log(styles["red"][0] + "%s" + styles["red"][1], message);
+      break;
+    case LOG_TYPE.DONE:
+      console.log(styles["green"][0] + "%s" + styles["green"][1], message);
       break;
     default:
       console.log(message);

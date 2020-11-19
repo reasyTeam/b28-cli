@@ -13,7 +13,7 @@ let inTranslate = false;
  */
 class ExtractJs extends Extract {
   constructor(option) {
-    super(option);
+    super(option, 'js');
     this.leadingComment = "";
     this.tempNodes = [];
   }
@@ -28,7 +28,7 @@ class ExtractJs extends Extract {
         resolve(AST);
       } catch (err) {
         // 转换出错直接用旧的翻译工具
-        reject("文件转AST出错，无法转换！");
+        reject("文件转AST出错，无法转换，使用其它方式再次进行提取！");
       }
     });
   }
