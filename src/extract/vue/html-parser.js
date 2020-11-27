@@ -132,7 +132,8 @@ function parseExp(tocken, offset = 0) {
         tockens.push({
           start: ast.start + start,
           end: ast.end + start,
-          value: ast.value
+          value: ast.value,
+          type: "string"
         });
         break;
       case "CallExpression":
@@ -207,6 +208,13 @@ function listModuleTockens(tockens, text) {
       });
     } else {
       if (outData.isTrans) {
+        tocken.value &&
+          outData.trans.push({
+            isTrans: tocken.isTrans,
+            start: tocken.start,
+            end: tocken.end,
+            value: tocken.value
+          });
         continue;
       }
       if (tocken.isArg) {
@@ -366,7 +374,7 @@ function parseHTML(html, options) {
         let name = attr[1],
           value = attr[3] || attr[4] || attr[5] || "";
 
-        if (bindRE.test(name)) {
+        if (bindRE.test(name) || /_\(/.test(value)) {
           attrs.push({
             name,
             value,
@@ -374,7 +382,8 @@ function parseHTML(html, options) {
             end: end,
             directive: true
           });
-        } else if (["placeholder", "title", "alt"].indexOf(name) !== -1) {
+        } else {
+          // else if (["placeholder", "title", "alt"].indexOf(name) !== -1) {
           attrs.push({
             name,
             value,
@@ -419,12 +428,18 @@ function parseTemplate(template, target) {
           // 对于v-bind指令，只有当指令内容包含翻译函数时才会进行处理，其它情况不进行处理
           if (outData.isTrans) {
             outData.trans.forEach((item) => {
-              word = getWord(item.value);
+              if (item.isTrans) {
+                word = getWord(item.value);
+              } else if (item.type === "string" || chineseRE.test(item.value)) {
+                word = getWord(item.value);
+              }
+
               if (word && word !== item.value) {
                 langs.push({
                   start: item.start,
                   end: item.end,
-                  value: word
+                  value: word,
+                  needTrans: !item.isTrans
                 });
               }
             });
@@ -563,6 +578,9 @@ function parseTemplate(template, target) {
     }
     if (item.name && item.needBind) {
       let attrText = `:${item.name}="_('${item.value}')"`;
+      replace(item.start, item.end, attrText);
+    } else if (item.needTrans) {
+      let attrText = `_('${item.value}')`;
       replace(item.start, item.end, attrText);
     } else {
       // html节点内容文本

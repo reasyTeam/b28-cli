@@ -1,0 +1,53 @@
+b28-cli
+├── .babelrc
+├── .eslintrc.js
+├── .gitignore
+├── .npmignore
+├── B28.exe
+├── b28n.js                   ## 浏览器中使用的翻译文件
+├── index.js                  ## 入口文件
+├── package-lock.json
+├── package.json
+├── README.MD
+├── test                        ## 单元测试
+├── src
+|   ├── checkLangExcel.js       ## excel翻译检查
+|   ├── cmd.js                  ## 命令行交互指令处理
+|   ├── encode.js               ## 文件转码
+|   ├── excel2json.js           ## excel转接送
+|   ├── ExtractFile.js          ## 提取、翻译词条入口文件
+|   ├── ExtractFileOrigin.js    ## 原厂代码提取、翻译词条入口文件
+|   ├── ExtractLangExcel.js     ## 语言包excel解析处理
+|   ├── handle.js               ## 各功能输入参数处理
+|   ├── index.js                ## 工具入口文件
+|   ├── json2excel.js           ## json转excel
+|   ├── mergeJson.js            ## json合并
+|   ├── util                    ## 工具类函数
+|   |   ├── config.js         
+|   |   ├── getOption.js
+|   |   └── index.js
+|   ├── extractOrigin           ## 原厂代码处理   
+|   |   ├── extract.js
+|   |   ├── extract_html_ori.js 
+|   |   └── extract_js_ori.js
+|   ├── extract                 ## 提取、翻译核心代码
+|   |   ├── extract-html.js     ## html文件处理
+|   |   ├── extract-js.js       ## js文件处理
+|   |   ├── extract-regexp.js   ## 其它类型文件处理
+|   |   ├── extract-vue.js      ## vue文件处理
+|   |   ├── extract.js          ## 文件处理基类
+|   |   ├── vue         
+|   |   |   ├── html-parser.js  ## vue template解析
+|   |   |   ├── util.js         ## 工具函数
+|   |   |   └── vue-compiler.js ## Vue SPC解析
+|   |   ├── extractRegexp       ## 通过正则进行文件解析核心代码
+|   |   |   ├── index.js        
+|   |   |   └── lib.js           
+|   ├── debug                   ## 开发调试配置
+|   |   ├── index.js            ## 调试入口
+|   |   └── test.js             ## 调试用例
+├── .vscode
+|   └── launch.json             ## vscode 调试配置文件
+├── img
+└── dist
+
