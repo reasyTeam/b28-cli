@@ -1,11 +1,4 @@
-import {
-  log,
-  loadFile,
-  trim,
-  LOG_TYPE,
-  copyFile,
-  writeTextFile
-} from "../util/index";
+import { log, loadFile, trim, LOG_TYPE, copyFile, writeTextFile } from "../util/index";
 import { IGNORE_REGEXP } from "../util/config";
 
 import path from "path";
@@ -76,10 +69,7 @@ class Extract {
           // 写入文件
           log(`翻译文件-${filePath}`);
           writeTextFile(
-            path.resolve(
-              this.option.baseWritePath,
-              path.relative(this.option.baseReadPath, this.curFilePath)
-            ),
+            path.resolve(this.option.baseWritePath, path.relative(this.option.baseReadPath, this.curFilePath)),
             fileData
           );
         }
@@ -95,13 +85,7 @@ class Extract {
 
   copyFile(filePath) {
     //如果是翻译模式需要将未匹配的文件原样拷贝
-    copyFile(
-      filePath,
-      path.join(
-        this.option.baseWritePath,
-        path.relative(this.option.baseReadPath, filePath)
-      )
-    );
+    copyFile(filePath, path.join(this.option.baseWritePath, path.relative(this.option.baseReadPath, filePath)));
   }
 
   transNode(data) {
@@ -159,6 +143,7 @@ class Extract {
    * 如果只是提取词条，则直接返回空
    */
   getWord(val, isJs) {
+    let oriVal = val;
     if (!val || /^\s*$/.test(val)) {
       return "";
     }
@@ -192,8 +177,11 @@ class Extract {
     if (addValue) {
       if (this.option.isTranslate || this.option.isCheckTrans) {
         let transVal = this.option.transWords[addValue];
+        // 如果没有并且是js的话，就查询未对空白字符处理前的数据，是否有翻译
+        !transVal && (transVal = this.option.transWords[oriVal]);
         if (transVal) {
           delete this.option.oldData[addValue];
+          delete this.option.oldData[oriVal];
           return this.option.isCheckTrans ? "" : transVal;
         }
       }
@@ -204,8 +192,7 @@ class Extract {
 
   complete() {
     this.isWorking = false;
-    this.option.onComplete &&
-      this.option.onComplete(this.curFilePath, this.words);
+    this.option.onComplete && this.option.onComplete(this.curFilePath, this.words);
     // 重置提取的词条
     this.words = [];
   }
