@@ -1,15 +1,15 @@
 import start from "../index";
 import { COMMAD } from "../util/config";
 
-const hongPath = "../../test/TestFile/config/index.js";
+const hongPath = "./test/TestFile/config/index.js";
 
 // import arrayToJson from './arrayToJson';
 
 function getWords() {
   start({
     commandType: COMMAD.GET_WORDS,
-    baseReadPath: "C:/Users/lenovo/Desktop/trans",
-    baseOutPath: "C:/Users/lenovo/Desktop/trans",
+    baseReadPath: "E:/productCode/weiqi/eg100-9.25/code/src",
+    baseOutPath: "E:/productCode/weiqi/eg100-9.25/code/src",
     hongPath
   }).then((data) => {
     let t = data;
@@ -71,15 +71,35 @@ function translate() {
 }
 
 function check() {
+  // start({
+  //   commandType: COMMAD.CHECK_TRANSLATE,
+  //   baseCheckPath: "./test/TestFile/testData/allTest/translate",
+  //   langJsonPath: "./test/TestFile/testData/allTest/translate/lang.json",
+  //   hongPath,
+  //   logPath: "./test/TestFile/testData/allTest/"
+  // }).then((data) => {
+  //   let t = "";
+  // });
+
   start({
     commandType: COMMAD.CHECK_TRANSLATE,
-    baseCheckPath: "D:/project/AC系列/AC6V4.0-LNK01/AC5_cn_normal_src",
-    langJsonPath: "C:/Users/lenovo/Desktop/out/t.json",
-    hongPath,
-    logPath: "C:/Users/lenovo/Desktop/out"
+    baseCheckPath: "E:/productCode/weiqi/eg100-9.25/code/src/modules/authManage",
+    langJsonPath: "E:/productCode/weiqi/eg100-9.25/code/src/lang/CN.json",
+    logPath: "E:/productCode/weiqi/eg100-9.25/code/src",
+    hongPath
   }).then((data) => {
-    let t = "";
+    let t = data;
   });
+
+  // start({
+  //   commandType: COMMAD.CHECK_TRANSLATE,
+  //   baseCheckPath: "D:/project/AC系列/AC6V4.0-LNK01/AC5_cn_normal_src",
+  //   langJsonPath: "C:/Users/lenovo/Desktop/out/t.json",
+  //   hongPath,
+  //   logPath: "C:/Users/lenovo/Desktop/out"
+  // }).then((data) => {
+  //   let t = "";
+  // });
 }
 
 function json2excel() {
@@ -123,11 +143,11 @@ function origin() {
 function vueGet() {
   start({
     commandType: COMMAD.GET_WORDS,
-    // baseReadPath: './test/vue/get',
+    baseReadPath: "./test/vue/get",
     // baseReadPath: './test/vue/error',
-    baseReadPath: "C:/Users/lenovo/Desktop/test",
-    baseOutPath: "C:/Users/lenovo/Desktop/output",
-    // baseOutPath: './test/vue/output',
+    // baseReadPath: "C:/Users/lenovo/Desktop/test",
+    // baseOutPath: "C:/Users/lenovo/Desktop/output",
+    baseOutPath: "./test/vue/output",
     hongPath
   }).then((data) => {
     let t = data;
@@ -186,7 +206,7 @@ function transAllFile() {
 }
 
 module.exports = function () {
-  let command= "getLan";
+  let command = "check";
   switch (command) {
     case "check":
       check();
@@ -196,8 +216,8 @@ module.exports = function () {
         commandType: COMMAD.EXCEL_TO_JSON,
         keyName: "EN",
         valueName: "CN",
-        excelPath: "C:/Users/lenovo/Desktop/mw6.xlsx",
-        outJsonPath: "C:/Users/lenovo/Desktop"
+        excelPath: "E:/productCode/weiqi/eg100-9.25/code/src/EN.xlsx",
+        outJsonPath: "E:/productCode/weiqi/eg100-9.25/code/src"
       });
       break;
     case "trans":
@@ -239,6 +259,9 @@ module.exports = function () {
         keyName: "CN",
         valueName: "EN"
       });
+      break;
+    case "getWord":
+      getWords();
       break;
   }
 };

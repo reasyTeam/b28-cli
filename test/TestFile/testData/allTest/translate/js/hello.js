@@ -64,4 +64,30 @@
             ]
         });
     }
+
+    help = {
+        wirelessaccess: {
+        head: {
+            title: _("MAC Filters"),
+            content: _("\nNote: \n1. A max. of 64 rules is allowed for each SSID, and 100 rules for each frequency band. \n2. The MAC filter rule will be invalidated if the SSID it mapped to has been changed. You are required to manually choose an enabled wireless network to apply the MAC filter rule.")
+        },
+        body: [{
+            title: _("MAC Address Filter1"),
+            content: {
+                [_("MAC Address Filter2")]: _("- Disable: All wireless clients can connect to the corresponding WiFi network of this router. \n- Only Allow: Only wireless clients with the specified MAC addresses can access the corresponding WiFi network of this device. \n- Only Forbid: Only wireless clients with the specified MAC addresses cannot access the corresponding WiFi networks of this device.")
+            }
+        },
+        {
+            title: _("MAC Filters List"),
+            content: {
+                // key 值没翻译 但是没有提取
+                [_("MAC Filters List3")]: _('这是有双引号 " 有翻译的哦'),
+                // 中间有双空格 有翻译 
+                [_("MAC Address")]: _("Select a mode that address your application scenario \n- Coverage-oriented This mode applies to scenarios that the network environment is complex, users are scattered, and the interference is weak. \n- Capacity-oriented This mode applies to scenarios that the area is open and crowded with users and the interference is strong. \n- Default  This option is a balance between Coverage-oriented and Capacity-oriented."),
+                [_("Effective Network")]: _("\n前有换行，会被认为没有翻译"),
+                [_("Status")]: _("最后有多余的空格，会被认为没有翻译 ")
+            }
+        }]
+        }
+    }
 }(window, $));

@@ -41,5 +41,12 @@
     "system log": "系统日志",
     "攻击日志": "Attack 'Log\"",
     "error log": "错误日志",
-    "日志内容": "Log \n Content"
+    "日志内容": "Log \n Content",
+    "- Disable: All wireless clients can connect to the corresponding WiFi network of this router. \n- Only Allow: Only wireless clients with the specified MAC addresses can access the corresponding WiFi network of this device. \n- Only Forbid: Only wireless clients with the specified MAC addresses cannot access the corresponding WiFi networks of this device.": "− 关闭：允许所有无线设备连接到相应的无线网络。\n− 仅允许：允许列表中MAC地址对应的无线设备连接到相应的无线网络，拒绝其他无线设备连接。\n− 仅禁止：拒绝列表中MAC地址对应的无线设备连接到相应的无线网络，允许其他无线设备连接。",
+    "\nNote: \n1. A max. of 64 rules is allowed for each SSID, and 100 rules for each frequency band. \n2. The MAC filter rule will be invalidated if the SSID it mapped to has been changed. You are required to manually choose an enabled wireless network to apply the MAC filter rule.": "\n注意：\n1. 每个无线网络（SSID）最多支持64条访问控制规则，每个频段最多支持100条。\n2. 当修改无线网络名称（SSID）后，原无线网络名称所对应的MAC过滤信息将失效，需手动为其重新选择所需生效的无线网络（SSID）。",
+    "这是有双引号 \" 有翻译的哦": "This is the double quotation mark \"is translated",
+    "It is used to modify the usernames and passwords of the read-write user and read-only user. Spaces are not allowed in neither username nor password. ": "可以修改高级读写权限用户和普通只读权限用户的用户名及密码，请注意用户名和密码中不能存在空格；",
+    "最后有多余的空格，会被认为没有翻译 ": "There are extra spaces at the end, it will be considered as untranslated ",
+    "\n前有换行，会被认为没有翻译":"\nThere is a line break before it will be considered as untranslated",
+    "Select a mode that address your application scenario \n- Coverage-oriented This mode applies to scenarios that the network environment is complex, users are scattered, and the interference is weak. \n- Capacity-oriented This mode applies to scenarios that the area is open and crowded with users and the interference is strong. \n- Default  This option is a balance between Coverage-oriented and Capacity-oriented.": "请根据实际应用场景，选择“部署模式”。\n− 强覆盖：常用于环境复杂、用户分散且干扰较少的场景，可以尽可能地确保无线设备成功接入AP。\n− 高密度：常用于环境空旷、用户密度大且干扰较多的场景，可以确保无线设备连接到信号好的AP。\n− 默认：介于“强覆盖”和“高密度”之间。"
 }
