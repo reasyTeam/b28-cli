@@ -1,12 +1,4 @@
-import {
-  loadExcel,
-  writeJson,
-  formatKey,
-  decodeKey,
-  writeExcel,
-  log,
-  LOG_TYPE
-} from "./util/index";
+import { loadExcel, writeJson, formatKey, decodeKey, writeExcel, log, LOG_TYPE } from "./util/index";
 
 import path from "path";
 
@@ -109,9 +101,7 @@ function transferData(data, option) {
   value = value.toUpperCase().split(",");
 
   if (value.length === 1 && value[0] === "ALL") {
-    value = keyValueRow.filter(
-      (item) => !!item.replace(/\s/g, "") && item !== key
-    );
+    value = keyValueRow.filter((item) => !!item.replace(/\s/g, "") && item !== key);
   }
 
   let valueIndex = {};
@@ -186,11 +176,7 @@ function transferData(data, option) {
   let extName = path.extname(option.excelPath),
     reg = new RegExp(extName + "$");
 
-  writeExcel(
-    data,
-    option.excelPath.replace(reg, "_copy") + extName,
-    option.sheetName || "lang"
-  );
+  writeExcel(data, option.excelPath.replace(reg, "_copy") + extName, option.sheetName || "lang");
 
   return outData;
 }
@@ -210,7 +196,11 @@ function trim(str) {
   return str
     .replace(/^(\s+)|(\s+)$/, "")
     .replace(/ +/g, " ")
-    .replace(/\r\n/g, "\n");
+    .replace(/&#10;/g, "\n")
+    .replace(/&#9;/g, "\t")
+    .replace(/(\n)+/g, "\n")
+    .replace(/\r\n/g, "\n")
+    .replace(/[^\S\n]/g, " ");
 }
 
 export default excel2json;
