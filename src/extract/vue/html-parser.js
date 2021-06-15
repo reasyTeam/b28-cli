@@ -2,8 +2,10 @@ import { parse } from "babylon";
 import { makeMap, unicodeRegExp, no, chineseRE } from "./util";
 
 // Regular Expressions for parsing tags and attributes
-const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
-const dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
+const attribute =
+  /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
+const dynamicArgAttribute =
+  /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
 const ncname = `[a-zA-Z_][\\-\\.0-9_a-zA-Z${unicodeRegExp.source}]*`;
 const qnameCapture = `((?:${ncname}\\:)?${ncname})`;
 // dom标签开始位置
@@ -38,7 +40,8 @@ const buildRegex = (delimiters, full) => {
   // $&: 插入匹配的子串
   const open = delimiters[0].replace(regexEscapeRE, "\\$&");
   const close = delimiters[1].replace(regexEscapeRE, "\\$&");
-  const reg = open + "((?:.|\\n)+?)" + close;
+  // const reg = open + "((?:.|\\n)+?)" + close;
+  const reg = open + "((?:.|(?:\\r)?\\n)+?)" + close;
   return new RegExp(full ? `^${reg}$` : reg, "g");
 };
 
@@ -109,9 +112,18 @@ function parseExp(tocken, offset = 0) {
     return [];
   }
 
+  if (ast.program.body.length === 0) {
+    return [
+      {
+        start: start,
+        end: start + tocken.value.length,
+        isArg: true
+      }
+    ];
+  }
   ast = ast.program.body;
   let tockens = [];
-  ast.forEach((item) => {
+  ast.forEach(item => {
     if (typeof item === "object" && item.type === "ExpressionStatement") {
       tockens.push(...parseOperation(item.expression));
     }
@@ -122,6 +134,14 @@ function parseExp(tocken, offset = 0) {
     let tockens = [];
     switch (ast.type) {
       case "BinaryExpression":
+        if (ast.operator === "|") {
+          tockens.push({
+            start: ast.start + start,
+            end: ast.end + start,
+            isArg: true
+          });
+          break;
+        }
         while (ast.right) {
           tockens.unshift(...parseOperation(ast.right));
           ast = ast.left;
@@ -169,7 +189,7 @@ function parseExp(tocken, offset = 0) {
         tockens.push(...parseOperation(ast.alternate));
         break;
       case "ArrayExpression":
-        ast.elements.forEach((item) => {
+        ast.elements.forEach(item => {
           tockens.push(...parseOperation(item));
         });
         break;
@@ -418,7 +438,7 @@ function parseTemplate(template, target) {
   parseHTML(template, {
     start(attrs) {
       let word = "";
-      attrs.forEach((attr) => {
+      attrs.forEach(attr => {
         // 指令默认已添加翻译函数，未添加翻译函数代表不提取
         if (attr.directive) {
           // value的偏移量，计算value的ast时，start index需要偏移到value的起始位置
@@ -427,7 +447,7 @@ function parseTemplate(template, target) {
           let outData = listModuleTockens(tockens, attr.value);
           // 对于v-bind指令，只有当指令内容包含翻译函数时才会进行处理，其它情况不进行处理
           if (outData.isTrans) {
-            outData.trans.forEach((item) => {
+            outData.trans.forEach(item => {
               if (item.isTrans) {
                 word = getWord(item.value);
               } else if (item.type === "string" || chineseRE.test(item.value)) {
@@ -473,7 +493,7 @@ function parseTemplate(template, target) {
       // 文本内容中包含指令
       if ((tockens = parseText(text, delimiters))) {
         // 解析指令表达式转成AST
-        tockens.forEach((tocken) => {
+        tockens.forEach(tocken => {
           if (tocken.directive) {
             let asts = parseExp(tocken);
             textArr.push(listModuleTockens(asts, text));
@@ -500,7 +520,7 @@ function parseTemplate(template, target) {
             // let outData = listModuleTockens(tocken, text);
             if (tocken.isTrans) {
               hasTrans = true;
-              tocken.trans.forEach((item) => {
+              tocken.trans.forEach(item => {
                 oldWord = item.value;
                 let newStart = start + item.start;
                 let newEnd = newStart + item.value.length;
@@ -570,7 +590,7 @@ function parseTemplate(template, target) {
   });
 
   let offset = 0;
-  langs.forEach((item) => {
+  langs.forEach(item => {
     if (process.env.NODE_ENV === "dev") {
       console.log(
         `[test:][${template.slice(item.start + offset, item.end + offset)}]`

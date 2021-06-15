@@ -206,7 +206,7 @@ function transAllFile() {
 }
 
 module.exports = function () {
-  let command = "check";
+  let command = "getLan";
   switch (command) {
     case "check":
       check();
@@ -243,22 +243,22 @@ module.exports = function () {
       // });
       break;
     case "getLan":
-      // start({
-      //   commandType: COMMAD.GET_WORDS,
-      //   // onlyZH: true,
-      //   baseReadPath: "C:/Users/lenovo/Desktop/ts/src",
-      //   baseOutPath: "C:/Users/lenovo/Desktop/ts"
-      // });
       start({
-        commandType: COMMAD.TRANSLATE,
-        baseTranslatePath: "C:/Users/lenovo/Desktop/ts/src",
-        baseTransOutPath: "C:/Users/lenovo/Desktop/ts/out",
-        languagePath: "C:/Users/lenovo/Desktop/ts/提取词条EN.xlsx",
-        hongPath: "",
-        sheetName: "",
-        keyName: "CN",
-        valueName: "EN"
+        commandType: COMMAD.GET_WORDS,
+        // onlyZH: true,
+        baseReadPath: "C:/Users/lenovo/Desktop/src",
+        baseOutPath: "C:/Users/lenovo/Desktop"
       });
+      // start({
+      //   commandType: COMMAD.TRANSLATE,
+      //   baseTranslatePath: "./test/vue/debug",
+      //   baseTransOutPath: "./test/vue/out",
+      //   languagePath: "./test/vue/lang/debug.xlsx",
+      //   hongPath: "",
+      //   sheetName: "",
+      //   keyName: "CN",
+      //   valueName: "EN"
+      // });
       break;
     case "getWord":
       getWords();
