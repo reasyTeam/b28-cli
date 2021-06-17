@@ -11,7 +11,7 @@ function getWords() {
     baseReadPath: "E:/productCode/weiqi/eg100-9.25/code/src",
     baseOutPath: "E:/productCode/weiqi/eg100-9.25/code/src",
     hongPath
-  }).then((data) => {
+  }).then(data => {
     let t = data;
   });
 
@@ -52,7 +52,7 @@ function translate() {
     sheetName: "",
     keyName: "EN",
     valueName: "CN"
-  }).then((data) => {
+  }).then(data => {
     let t = "";
   });
 
@@ -83,11 +83,12 @@ function check() {
 
   start({
     commandType: COMMAD.CHECK_TRANSLATE,
-    baseCheckPath: "E:/productCode/weiqi/eg100-9.25/code/src/modules/authManage",
+    baseCheckPath:
+      "E:/productCode/weiqi/eg100-9.25/code/src/modules/authManage",
     langJsonPath: "E:/productCode/weiqi/eg100-9.25/code/src/lang/CN.json",
     logPath: "E:/productCode/weiqi/eg100-9.25/code/src",
     hongPath
-  }).then((data) => {
+  }).then(data => {
     let t = data;
   });
 
@@ -135,7 +136,7 @@ function origin() {
     commandType: COMMAD.ORIGINAL_CODE,
     baseProPath: "./test/TestFile/origin",
     baseProOutPath: "./test/TestFile/output/origin"
-  }).then((data) => {
+  }).then(data => {
     // return expect(data).toEqual(words);
   });
 }
@@ -149,7 +150,7 @@ function vueGet() {
     // baseOutPath: "C:/Users/lenovo/Desktop/output",
     baseOutPath: "./test/vue/output",
     hongPath
-  }).then((data) => {
+  }).then(data => {
     let t = data;
   });
 }
@@ -164,7 +165,7 @@ function vueTrans() {
     sheetName: "",
     keyName: "EN",
     valueName: "CN"
-  }).then((data) => {
+  }).then(data => {
     let t = data;
   });
 }
@@ -179,7 +180,7 @@ function translateJs() {
     sheetName: "",
     keyName: "EN",
     valueName: "CN"
-  }).then((data) => {
+  }).then(data => {
     let t = "";
   });
 }
@@ -190,7 +191,7 @@ function getAllSrc() {
     baseReadPath: "C:/Users/lenovo/Desktop/trans/src",
     baseOutPath: "C:/Users/lenovo/Desktop/trans/out",
     hongPath
-  }).then((data) => {
+  }).then(data => {
     let t = data;
   });
 }
@@ -200,7 +201,7 @@ function transAllFile() {
     commandType: COMMAD.TRANS_ENCODE,
     transFilePath: "C:/Users/lenovo/Desktop/trans/out",
     transOutPath: "C:/Users/lenovo/Desktop/trans/out"
-  }).then((data) => {
+  }).then(data => {
     let t = data;
   });
 }
@@ -243,22 +244,31 @@ module.exports = function () {
       // });
       break;
     case "getLan":
-      start({
-        commandType: COMMAD.GET_WORDS,
-        // onlyZH: true,
-        baseReadPath: "C:/Users/lenovo/Desktop/src",
-        baseOutPath: "C:/Users/lenovo/Desktop"
-      });
       // start({
-      //   commandType: COMMAD.TRANSLATE,
-      //   baseTranslatePath: "./test/vue/debug",
-      //   baseTransOutPath: "./test/vue/out",
-      //   languagePath: "./test/vue/lang/debug.xlsx",
-      //   hongPath: "",
-      //   sheetName: "",
-      //   keyName: "CN",
-      //   valueName: "EN"
+      //   commandType: COMMAD.GET_WORDS,
+      //   // onlyZH: true,
+      //   // baseReadPath: "C:/Users/lenovo/Desktop/src",
+      //   // baseOutPath: "C:/Users/lenovo/Desktop"
+      //   // baseReadPath: "./test/vue/debug/file",
+      //   // baseOutPath: "./test/vue/debug"
+      //   baseReadPath: "D:/project/GNEUI/SourceCodes/Trunk/GNEUIv1.0/A27",
+      //   baseOutPath: "C:/Users/lenovo/Desktop"
       // });
+      start({
+        commandType: COMMAD.TRANSLATE,
+        // baseTranslatePath: "./test/vue/debug/file",
+        // baseTransOutPath: "./test/vue/debug/out",
+        // languagePath: "./test/vue/debug/lang.xlsx",
+        baseTranslatePath: "C:/Users/lenovo/Desktop/src",
+        baseTransOutPath: "C:/Users/lenovo/Desktop/out",
+        languagePath: "C:/Users/lenovo/Desktop/lang.xlsx",
+        hongPath: "",
+        sheetName: "",
+        // keyName: "CN",
+        // valueName: "EN"
+        keyName: "EN",
+        valueName: "CN"
+      });
       break;
     case "getWord":
       getWords();

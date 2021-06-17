@@ -1,0 +1,21 @@
+{
+  "d:/git/reasyTeam/b28-cli/test/vue/debug/file/a.vue": "d:/git/reasyTeam/b28-cli/test/vue/debug/file/a.vue",
+  "/%s page": "/%s页",
+  "%sMbps": "%sMbps",
+  "%s%s Month": "%s%s月",
+  "start time": "开始时间",
+  "time": "时间",
+  "start time 4444": "开始时间4",
+  "time 4444": "时间4",
+  "start time 1111": "开始时间1",
+  "time 11111": "时间1",
+  "test demo 1 %s": "测试用例1 %s",
+  "start time 2222": "开始时间2",
+  "time 2222": "时间2",
+  "start time 3333": "开始时间3",
+  "test demo 3 %s": "测试用例3 %s",
+  "test demo 4 %s": "测试用例4 %s",
+  "main device": "主网络设备",
+  "this is another button": "这是另一个按钮",
+  "I knew": "我知道了"
+}

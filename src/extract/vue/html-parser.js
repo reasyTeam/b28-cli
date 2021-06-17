@@ -48,7 +48,9 @@ const buildRegex = (delimiters, full) => {
 const ignoreRE = [];
 
 /**
- * 解析字符串表达式
+ * 解析字符串表达式，拆解成多个部分
+ * 比如：<label>在线用户（{{ online }}人）</label>
+ * 解析成三部分：在线用户（，{{online}}，人）
  */
 export function parseText(
   text,
@@ -57,18 +59,20 @@ export function parseText(
   // 根据自定义分隔符适配匹配正则
   const tagRE = delimiters ? buildRegex(delimiters) : defaultTagRE;
   if (!tagRE.test(text)) {
-    return;
+    return {};
   }
   // 文本 + 命令
-  const tokens = [];
+  const tockens = [];
   // 指定下一次匹配的起始索引
   let lastIndex = (tagRE.lastIndex = 0);
   let match, index;
+  let needMerge = false;
   while ((match = tagRE.exec(text))) {
     index = match.index;
     // push text token
-    if (index > lastIndex) {
-      tokens.push({
+    if (index > lastIndex && /[^\s]/.test(text.slice(lastIndex, index))) {
+      needMerge = true;
+      tockens.push({
         value: text.slice(lastIndex, index),
         start: lastIndex,
         end: index
@@ -78,7 +82,7 @@ export function parseText(
 
     let startEmptyLength = /^\s*/g.exec(match[1])[0].length;
     const exp = match[1].trim();
-    tokens.push({
+    tockens.push({
       value: exp,
       directive: true,
       start: index + startEmptyLength + delimiters[0].length,
@@ -86,20 +90,21 @@ export function parseText(
     });
     lastIndex = index + match[0].length;
   }
-  if (lastIndex < text.length) {
-    tokens.push({
+  if (lastIndex < text.length && /[^\s]/.test(text.slice(lastIndex))) {
+    needMerge = true;
+    tockens.push({
       value: text.slice(lastIndex),
       start: lastIndex,
       end: text.length
     });
   }
-  return tokens;
+  return { tockens, needMerge };
 }
 
 /**
  * 解析{{}}指令内部的表达式
  */
-function parseExp(tocken, offset = 0) {
+function parseExp(tocken, offset = 0, needMerge = false) {
   let ast,
     start = tocken.start + offset;
 
@@ -112,20 +117,17 @@ function parseExp(tocken, offset = 0) {
     return [];
   }
 
-  if (ast.program.body.length === 0) {
-    return [
-      {
-        start: start,
-        end: start + tocken.value.length,
-        isArg: true
-      }
-    ];
-  }
-  ast = ast.program.body;
+  ast = ast.program;
+  ast = ast.body.length === 0 ? ast.directives : ast.body;
+
   let tockens = [];
   ast.forEach(item => {
-    if (typeof item === "object" && item.type === "ExpressionStatement") {
-      tockens.push(...parseOperation(item.expression));
+    if (typeof item === "object") {
+      if (item.type === "ExpressionStatement") {
+        tockens.push(...parseOperation(item.expression));
+      } else if (item.type === "Directive") {
+        tockens.push(...parseOperation(item.value));
+      }
     }
   });
   return tockens;
@@ -134,26 +136,35 @@ function parseExp(tocken, offset = 0) {
     let tockens = [];
     switch (ast.type) {
       case "BinaryExpression":
-        if (ast.operator === "|") {
+        if (ast.operator !== "+") {
           tockens.push({
             start: ast.start + start,
             end: ast.end + start,
-            isArg: true
+            astStart: ast.start,
+            astEnd: ast.end,
+            // 是否解析成翻译函数的参数部分
+            isArg: true,
+            needMerge
           });
           break;
         }
+        needMerge = true;
         while (ast.right) {
           tockens.unshift(...parseOperation(ast.right));
           ast = ast.left;
         }
         tockens.unshift(...parseOperation(ast));
         break;
+      case "DirectiveLiteral":
       case "StringLiteral":
         tockens.push({
           start: ast.start + start,
           end: ast.end + start,
+          astStart: ast.start,
+          astEnd: ast.end,
           value: ast.value,
-          type: "string"
+          type: "string",
+          needMerge
         });
         break;
       case "CallExpression":
@@ -164,6 +175,8 @@ function parseExp(tocken, offset = 0) {
           ) {
             tockens.push({
               isTrans: true,
+              astStart: ast.arguments[0].start + 1,
+              astEnd: ast.arguments[0].end - 1,
               start: ast.arguments[0].start + 1 + start,
               end: ast.arguments[0].end - 1 + start,
               value: ast.arguments[0].value
@@ -180,13 +193,26 @@ function parseExp(tocken, offset = 0) {
           tockens.push({
             start: ast.start + start,
             end: ast.end + start,
-            isArg: true
+            isArg: true,
+            needMerge
           });
         }
         break;
       case "ConditionalExpression":
-        tockens.push(...parseOperation(ast.consequent));
-        tockens.push(...parseOperation(ast.alternate));
+        let left = parseOperation(ast.consequent);
+        let right = parseOperation(ast.alternate);
+        if (needMerge) {
+          tockens.push({
+            start: ast.start + start,
+            end: ast.end + start,
+            isArg: true,
+            needMerge,
+            tockens: [...left, ...right]
+          });
+        } else {
+          tockens.push(...left);
+          tockens.push(...right);
+        }
         break;
       case "ArrayExpression":
         ast.elements.forEach(item => {
@@ -197,15 +223,18 @@ function parseExp(tocken, offset = 0) {
         tockens.push({
           start: ast.start + start,
           end: ast.end + start,
-          isArg: true
+          isArg: true,
+          needMerge
         });
     }
+
     return tockens;
   }
 }
 
 /**
- * 解析parseExp的结果，即{{}}模板表达式内的ast，提取词条
+ * 解析parseExp的结果，即{{}}模板表达式内的ast，提取词条或者合并词条
+ * 如果文本中存在翻译函数，则直接处理翻译函数，其它词条文本会被处理，但是不会进行任何的参数合并操作，只处理词条
  */
 function listModuleTockens(tockens, text) {
   let outData = {
@@ -217,7 +246,7 @@ function listModuleTockens(tockens, text) {
   for (let i = 0, l = tockens.length; i < l; i++) {
     let tocken = tockens[i];
 
-    // 如果文本中存在翻译函数，则直接处理翻译函数，其它文本忽略
+    // 如果当前语法段是翻译函数，则直接处理
     if (tocken.isTrans) {
       outData.isTrans = true;
       outData.trans.push({
@@ -227,6 +256,7 @@ function listModuleTockens(tockens, text) {
         value: tocken.value
       });
     } else {
+      // 当前表达式中已包含翻译函数，则剩下的词条只做提取或翻译处理
       if (outData.isTrans) {
         tocken.value &&
           outData.trans.push({
@@ -237,14 +267,31 @@ function listModuleTockens(tockens, text) {
           });
         continue;
       }
+      // 当前表达式中不包含任何翻译函数
+      // 如果当前子表达式是用作翻译函数的参数
       if (tocken.isArg) {
-        outData.args.push(text.slice(tocken.start, tocken.end));
+        tocken.valueText = text.slice(tocken.start, tocken.end);
+        outData.args.push(tocken);
+        // 处理args里面的
         outData.text += "%s";
       } else {
-        outData.text += tocken.value;
+        // 当前表达式需要合并
+        if (tocken.needMerge) {
+          outData.text += tocken.value;
+        } else {
+          // 其它情况
+          tocken.value &&
+            outData.trans.push({
+              isTrans: tocken.isTrans,
+              start: tocken.start,
+              end: tocken.end,
+              value: tocken.value
+            });
+        }
       }
     }
   }
+
   return outData;
 }
 
@@ -421,6 +468,45 @@ function parseHTML(html, options) {
   }
 }
 
+// 处理表达式中最后设为arg的部分
+function handleArgs(args) {
+  return args.map(item => {
+    let text = item.valueText,
+      word = "";
+    if (item.tockens) {
+      let offset = 0;
+      item.tockens.forEach(tocken => {
+        if (tocken.type === "string") {
+          word = getWord(tocken.value);
+          if (word) {
+            let v = `_('${word.replace(/'/, "\\'")}')`;
+            text = text.splice(
+              tocken.astStart + offset,
+              tocken.astEnd + offset,
+              v
+            );
+            offset = v.length - tocken.astEnd + tocken.astStart;
+          }
+        } else if (tocken.isTrans) {
+          word = getWord(tocken.value);
+          if (word) {
+            let v = word.replace(/'/g, "\\'").replace(/"/g, '\\"');
+            text = text.splice(
+              tocken.astStart + offset,
+              tocken.astEnd + offset,
+              v
+            );
+            offset = v.length - tocken.astEnd + tocken.astStart;
+          }
+        }
+      });
+    }
+    return text;
+  });
+}
+
+function getWord() {}
+
 /**
  * html转AST，记录词条的位置信息
  */
@@ -430,9 +516,9 @@ function parseTemplate(template, target) {
   // 存储词条相关内容，供翻译的时候直接添加翻译函数
   let langs = [];
 
-  function getWord(text) {
+  getWord = function (text) {
     return target.getWord(text);
-  }
+  };
   global.template = template;
 
   parseHTML(template, {
@@ -448,6 +534,7 @@ function parseTemplate(template, target) {
           // 对于v-bind指令，只有当指令内容包含翻译函数时才会进行处理，其它情况不进行处理
           if (outData.isTrans) {
             outData.trans.forEach(item => {
+              word = "";
               if (item.isTrans) {
                 word = getWord(item.value);
               } else if (item.type === "string" || chineseRE.test(item.value)) {
@@ -486,16 +573,16 @@ function parseTemplate(template, target) {
         return;
       }
 
-      let tockens,
-        // 文本直接添加，指令则为对象
-        textArr = [];
+      // 文本直接添加，指令则为对象
+      let textArr = [];
+      let { tockens, needMerge } = parseText(text, delimiters);
 
       // 文本内容中包含指令
-      if ((tockens = parseText(text, delimiters))) {
+      if (tockens) {
         // 解析指令表达式转成AST
         tockens.forEach(tocken => {
           if (tocken.directive) {
-            let asts = parseExp(tocken);
+            let asts = parseExp(tocken, 0, needMerge);
             textArr.push(listModuleTockens(asts, text));
           } else {
             textArr.push(tocken.value);
@@ -517,27 +604,30 @@ function parseTemplate(template, target) {
             oldWord += tocken;
           } else {
             // 如果文本中存在翻译函数，则直接处理翻译函数，其它文本忽略
-            // let outData = listModuleTockens(tocken, text);
+            tocken.trans.forEach(item => {
+              word = "";
+              let newStart = start + item.start;
+              let newEnd = newStart + item.end - item.start;
+              if (item.isTrans) {
+                word = getWord(item.value);
+              } else if (item.type === "string" || chineseRE.test(item.value)) {
+                word = getWord(item.value);
+              }
+
+              if (word && word !== item.value) {
+                langs.push({
+                  start: newStart,
+                  end: newEnd,
+                  value: word,
+                  needTrans: !item.isTrans
+                });
+              }
+            });
+
             if (tocken.isTrans) {
               hasTrans = true;
-              tocken.trans.forEach(item => {
-                oldWord = item.value;
-                let newStart = start + item.start;
-                let newEnd = newStart + item.value.length;
-
-                // word = getWord(oldWord);
-                if ((word = getWord(oldWord))) {
-                  if (word !== oldWord) {
-                    langs.push({
-                      start: newStart,
-                      end: newEnd,
-                      value: word
-                    });
-                  }
-                }
-              });
-            } else {
-              args.push(...tocken.args);
+            } else if (tocken.text) {
+              args.push(...handleArgs(tocken.args));
               oldWord += tocken.text;
             }
           }
@@ -547,8 +637,8 @@ function parseTemplate(template, target) {
           return;
         }
 
-        // 非_('%s')内的%s不处理
-        if (/^(%s)*$/.test(oldWord.replace(/^\s*|\s*$/g, ""))) {
+        // 如果只包含空格换行和%s则不作任何处理
+        if (oldWord.replace(/\s|%s/g, "") === "") {
           return;
         }
 
